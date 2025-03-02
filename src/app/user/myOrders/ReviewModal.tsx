@@ -17,20 +17,24 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"]
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.peachflask.com"
+const fileSchema = typeof File !== "undefined" ? z.instanceof(File) : z.any();
 
 const reviewSchema = z.object({
     productId: z.string().nonempty("Please select a product"),
     rating: z.number().min(1, "Please select a rating").max(5),
     comment: z.string().min(10, "Comment must be at least 10 characters long"),
     images: z
-        .array(z.instanceof(File))
-        .refine((files) => files.every((file) => file.size <= MAX_FILE_SIZE), `Max file size is 10MB.`)
+        .array(fileSchema)
+        .refine(
+            (files) => files.every((file) => file.size <= MAX_FILE_SIZE),
+            `Max file size is 10MB.`
+        )
         .refine(
             (files) => files.every((file) => ACCEPTED_IMAGE_TYPES.includes(file.type)),
-            "Only .jpg, .jpeg, .png formats are supported.",
+            "Only .jpg, .jpeg, .png formats are supported."
         )
         .optional(),
-})
+});
 
 type ReviewFormValues = z.infer<typeof reviewSchema>
 
