@@ -20,7 +20,7 @@ const formSchema = z.object({
     path: ["confirmPassword"],
 });
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.peachflask.com"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
 
 export default function ResetPasswordPage() {
     const { toast } = useToast();

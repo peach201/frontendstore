@@ -16,7 +16,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"]
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.peachflask.com"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
 const fileSchema = typeof File !== "undefined" ? z.instanceof(File) : z.any();
 
 const reviewSchema = z.object({

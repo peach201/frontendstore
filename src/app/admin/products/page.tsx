@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Image from "next/image"
 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.peachflask.com"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
 
 
 const sizeOptions = ["500ml", "1L", "1.5L", "2L"]
