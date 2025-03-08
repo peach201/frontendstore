@@ -6,7 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useToast } from "@/components/ui/use-toast"
 import { useEffect, useRef, useState, useCallback } from "react"
-import { Loader2, Menu, ShoppingCart } from "lucide-react"
+import { Loader2, Menu, Search, ShoppingCart, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { jwtDecode } from "jwt-decode"
 import { useUser } from "./UserContext"
@@ -34,9 +34,11 @@ export default function Header() {
     // New state to control search dropdown visibility.
     const [showSearchResults, setShowSearchResults] = useState(false)
     const [sheetOpen, setSheetOpen] = useState(false)
+    const [showMobileSearch, setShowMobileSearch] = useState(false)
 
     // Ref for search container.
     const searchContainerRef = useRef<HTMLDivElement>(null)
+    const mobileSearchRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         const checkAuthState = () => {
@@ -123,6 +125,10 @@ export default function Header() {
         if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
             setShowSearchResults(false)
         }
+
+        if (mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node)) {
+            setShowMobileSearch(false)
+        }
     }, [])
 
     useEffect(() => {
@@ -163,11 +169,10 @@ export default function Header() {
                         ))}
                     </nav>
 
-                    {/* Search Input */}
-
                     {/* Right side items */}
                     <div className="flex items-center space-x-4">
-                        <div className="relative hidden md:block " ref={searchContainerRef}>
+                        {/* Desktop Search */}
+                        <div className="relative hidden md:block" ref={searchContainerRef}>
                             <Input
                                 type="search"
                                 placeholder="Search products..."
@@ -199,6 +204,11 @@ export default function Header() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Mobile Search Button */}
+                        <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setShowMobileSearch(true)}>
+                            <Search className="h-5 w-5" />
+                        </Button>
 
                         <Link href="/user/cart">
                             <Button variant="ghost" size="icon" className="relative">
@@ -252,34 +262,6 @@ export default function Header() {
                             <SheetTitle></SheetTitle>
                             <SheetContent side="right">
                                 <nav className="flex flex-col space-y-4">
-                                    <Input
-                                        type="search"
-                                        placeholder="Search products..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        onFocus={() => {
-                                            if (searchTerm.trim() !== "") setShowSearchResults(true)
-                                        }}
-                                    />
-                                    {isSearching && <Loader2 className="h-4 w-4 animate-spin self-center" />}
-                                    {showSearchResults && searchResults.length > 0 && (
-                                        <div className="bg-background border rounded-md shadow-lg">
-                                            {/*  eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                            {searchResults.map((product: any) => (
-                                                <Link
-                                                    key={product._id}
-                                                    href={`/user/productDetail/${product._id}`}
-                                                    className="block px-4 py-2 hover:bg-muted"
-                                                    onClick={() => {
-                                                        setShowSearchResults(false)
-                                                        setSheetOpen(false)
-                                                    }}
-                                                >
-                                                    {product.name}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    )}
                                     {navItems.map((item) => (
                                         <Link
                                             key={item.href}
@@ -310,6 +292,55 @@ export default function Header() {
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Search Popup */}
+            {showMobileSearch && (
+                <div
+                    className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-16 px-4"
+                    ref={mobileSearchRef}
+                >
+                    <div className="w-full max-w-md bg-background border rounded-lg shadow-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Input
+                                type="search"
+                                placeholder="Search products..."
+                                className="flex-1"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                autoFocus
+                            />
+                            <Button variant="ghost" size="icon" onClick={() => setShowMobileSearch(false)}>
+                                <X className="h-5 w-5" />
+                            </Button>
+                        </div>
+
+                        {isSearching && (
+                            <div className="flex justify-center py-2">
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                            </div>
+                        )}
+
+                        {showSearchResults && searchResults.length > 0 && (
+                            <div className="max-h-[60vh] overflow-auto">
+                                {/*  eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                {searchResults.map((product: any) => (
+                                    <Link
+                                        key={product._id}
+                                        href={`/user/productDetail/${product._id}`}
+                                        className="block px-4 py-3 hover:bg-muted border-b last:border-0"
+                                        onClick={() => {
+                                            setShowSearchResults(false)
+                                            setShowMobileSearch(false)
+                                        }}
+                                    >
+                                        {product.name}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </header>
     )
 }

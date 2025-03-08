@@ -447,50 +447,53 @@ interface ProductCardProps {
 
 function ProductCard({ product, viewMode, handleAddToCart }: ProductCardProps) {
     return (
-        <Card className={`bg-white overflow-hidden flex ${viewMode === "list" ? "flex-row" : "flex-col"}`}>
-            <CardHeader className={`p-0 ${viewMode === "list" ? "w-1/3" : ""}`}>
-                <div className={`relative ${viewMode === "list" ? "h-full" : "aspect-square"}`}>
-                    <Image
-                        src={product.images[0]?.url || "/placeholder.svg"}
-                        alt={product.name}
-                        layout="fill"
-                        objectFit="cover"
-                        loading="lazy"
-                    />
-                </div>
-            </CardHeader>
-            <CardContent className={`flex-1 p-4 ${viewMode === "list" ? "w-2/3" : ""}`}>
-                <Link href={`/user/productDetail/${product._id}`}>
-                    <h3 className="font-medium text-gray-900 mb-1 hover:text-gray-600 transition-colors">{product.name}</h3>
-                </Link>
-                <p className={`text-sm text-gray-500 ${viewMode === "list" ? "" : "line-clamp-2"}`}>{product.description}</p>
-                {viewMode === "list" && (
-                    <div className="mt-4">
-                        <span className="text-lg font-semibold">Rs {product.price.toFixed(2)}</span>
+         <Link href={`/user/productDetail/${product._id}`}>
+            <Card className={`bg-white overflow-hidden flex ${viewMode === "list" ? "flex-row" : "flex-col"}`}>
+                <CardHeader className={`p-0 ${viewMode === "list" ? "w-1/3" : ""}`}>
+                    <div className={`relative ${viewMode === "list" ? "h-full" : "aspect-square"}`}>
+                        <Image
+                            src={product.images[0]?.url || "/placeholder.svg"}
+                            alt={product.name}
+                            layout="fill"
+                            objectFit="cover"
+                            loading="lazy"
+                        />
                     </div>
-                )}
-            </CardContent>
-            <CardFooter
-                className={`p-4 ${viewMode === "list" ? "flex-col items-start" : "flex flex-col  justify-between items-center"}`}
-            >
-                {viewMode === "grid" && <span className="text-lg font-semibold ">Rs {product.price.toFixed(2)}</span>}
-                {product.stock > 0 ? (
-                    <Button
-                        variant="default"
-                        size="sm"
-                        className="bg-gray-900 hover:bg-gray-800 mt-2"
-                        onClick={() => handleAddToCart(product)}
-                        aria-label={`Add ${product.name} to cart`}
-                    >
-                        <Plus className="mr-2 h-4 w-4" /> Add to Cart
-                    </Button>
-                ) : (
-                    <Button variant="outline" size="sm" disabled aria-label={`${product.name} is out of stock`}>
-                        Out of Stock
-                    </Button>
-                )}
-            </CardFooter>
-        </Card>
+                </CardHeader>
+                <CardContent className={`flex-1 px-4 py-2 ${viewMode === "list" ? "w-2/3" : ""}`}>
+
+                    <h3 className="font-medium text-gray-900  hover:text-gray-600 transition-colors line-clamp-1">{product.name}</h3>
+                    {/* <p className={`text-sm text-gray-500 ${viewMode === "list" ? "" : "line-clamp-2"}`}>{product.description}</p> */}
+                    {viewMode === "list" && (
+                        <div className="mt-4">
+                            <span className="text-lg font-semibold">Rs {product.price.toFixed(2)}</span>
+                        </div>
+                    )}
+                </CardContent>
+                <CardFooter
+                    className={` ${viewMode === "list" ? "flex-col items-start" : "flex flex-col  justify-between items-center"}`}
+                >
+                    {viewMode === "grid" && <span className="text-lg font-semibold ">Rs {product.price.toFixed(2)}</span>}
+                    {product.stock > 0 ? (
+                        <Button
+                            variant="default"
+                            size="sm"
+                            className="bg-gray-900 hover:bg-gray-800 "
+                            onClick={() => handleAddToCart(product)}
+                            aria-label={`Add ${product.name} to cart`}
+                        >
+                            <Plus className="mr-2 h-4 w-4" /> Add to Cart
+                        </Button>
+                    ) : (
+                        <Button variant="outline" size="sm" disabled aria-label={`${product.name} is out of stock`}>
+                            Out of Stock
+                        </Button>
+                    )}
+                </CardFooter>
+            </Card>
+            
+        </Link>
+        
     )
 }
 

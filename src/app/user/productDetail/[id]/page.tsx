@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp, Star } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useCart } from "@/app/Component/CartContext"
 import ReviewSection from "./ReviewSection"
@@ -34,8 +34,6 @@ interface ApiResponse {
     data: Product
 }
 
-
-
 interface Review {
     _id: string
     user: {
@@ -58,7 +56,9 @@ interface ReviewsResponse {
         page: number
     }
 }
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
+
+const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
 
 export default function ProductPage() {
     const params = useParams()
@@ -70,6 +70,7 @@ export default function ProductPage() {
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
     const [reviews, setReviews] = useState<Review[]>([])
     const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
+    const [showFullDescription, setShowFullDescription] = useState(false)
     const { cart, addToCart } = useCart()
     const { toast } = useToast()
 
@@ -89,14 +90,14 @@ export default function ProductPage() {
                 if (!data.success) {
                     toast({
                         title: "Error",
-                        description: "Failed  to fetch related products",
+                        description: "Failed to fetch related products",
                         variant: "destructive",
                     })
                 }
                 // Store all products except current one
                 const filteredProducts = data.data.filter((p: Product) => p._id !== id)
                 setRelatedProducts(filteredProducts)
-            } catch (err:unknown) {
+            } catch (err: unknown) {
                 toast({
                     title: "Error",
                     description: "Error fetching related products: " + (err instanceof Error ? err.message : "Unknown error"),
@@ -104,7 +105,7 @@ export default function ProductPage() {
                 })
             }
         },
-        [id,toast],
+        [id, toast],
     )
 
     useEffect(() => {
@@ -192,44 +193,76 @@ export default function ProductPage() {
         return <ErrorState error={error} />
     }
 
+    // Truncate description for initial view
+    const truncatedDescription =
+        product.description.length > 150 ? `${product.description.substring(0, 150)}...` : product.description
+
     return (
-        <div className="mx-auto px-4 py-8">
-            <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                    <div className="aspect-w-3 aspect-h-2 rounded-lg overflow-hidden">
+        <div className="container mx-auto px-4 py-8 w-full">
+            {/* Main product section - Image left, details right */}
+            <div className="grid md:grid-cols-2 gap-8 mb-12 w-full">
+                {/* Left side - Product images */}
+                <div className="space-y-5 w-[1/3]">
+                    <div className="aspect-[16/10] rounded-lg overflow-hidden border">
                         <Image
                             src={selectedImage || "/placeholder.svg"}
                             alt={product.name}
                             width={600}
-                            height={400}
-                            className="object-cover"
+                            height={600}
+                            className="object-cover w-full h-full"
                         />
                     </div>
-                    <div className="grid grid-cols-5 gap-2">
+                    <div className="flex overflow-x-auto gap-2 pb-2 hide-scrollbar">
                         {product.images.map((image) => (
                             <div
                                 key={image.id}
-                                className="aspect-w-1 aspect-h-1 rounded-lg overflow-hidden cursor-pointer"
+                                className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 cursor-pointer transition-all ${selectedImage === image.url ? "border-primary" : "border-gray-200"
+                                    }`}
                                 onClick={() => handleImageClick(image.url)}
                             >
                                 <Image
                                     src={image.url || "/placeholder.svg"}
                                     alt={product.name}
-                                    width={100}
-                                    height={100}
-                                    className="object-cover"
+                                    width={80}
+                                    height={80}
+                                    className="object-cover w-full h-full"
                                 />
                             </div>
                         ))}
                     </div>
                 </div>
+
+                {/* Right side - Product details */}
                 <div className="space-y-6">
                     <h1 className="text-3xl font-bold">{product.name}</h1>
-                    <p className="text-gray-600">{product.description}</p>
-                    <p className="text-2xl font-semibold">Rs {product.price.toFixed(2)}</p>
+
+                    {/* Rating display */}
+                    <div className="flex items-center">
+                        <div className="flex items-center">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                    key={star}
+                                    className={`w-5 h-5 ${star <=
+                                            (reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0)
+                                            ? "text-yellow-400 fill-current"
+                                            : "text-gray-300"
+                                        }`}
+                                />
+                            ))}
+                        </div>
+                        <span className="ml-2 text-gray-600">
+                            {reviews.length > 0
+                                ? `${(reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length).toFixed(1)} out of 5 (${reviews.length} reviews)`
+                                : "No reviews yet"}
+                        </span>
+                    </div>
+
+                    <div className="text-2xl font-semibold">Rs {product.price.toFixed(2)}</div>
+
+                    {/* Sizes */}
                     <div>
                         <h2 className="text-lg font-semibold mb-2">Sizes:</h2>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-wrap gap-2">
                             {product.sizes.map((size) => (
                                 <span key={size} className="px-3 py-1 border rounded-full text-sm">
                                     {size}
@@ -237,6 +270,8 @@ export default function ProductPage() {
                             ))}
                         </div>
                     </div>
+
+                    {/* Categories */}
                     <div>
                         <h2 className="text-lg font-semibold mb-2">Categories:</h2>
                         <div className="flex flex-wrap gap-2">
@@ -247,19 +282,70 @@ export default function ProductPage() {
                             ))}
                         </div>
                     </div>
+
+                    {/* Stock information */}
+                    {product.stock > 0 && (
+                        <p className="text-sm text-gray-600">
+                            {product.stock <= 5 ? `Only ${product.stock} left in stock - order soon` : "In stock"}
+                        </p>
+                    )}
+                    
+                    {/* Add to cart button */}
                     <button
                         onClick={handleAddToCart}
-                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                         disabled={product.stock === 0}
                     >
                         {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
                     </button>
+
+                    
                 </div>
             </div>
-            <ReviewSection reviews={reviews} />
-            <RelatedProducts products={relatedProducts} />
-            <FAQ />
-            <RecentProducts currentProductId={product._id} />
+
+            {/* Description section */}
+            <div className="mb-12">
+                <h2 className="text-2xl font-bold mb-4">Product Description</h2>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-gray-700">{showFullDescription ? product.description : truncatedDescription}</p>
+                    {product.description.length > 150 && (
+                        <button
+                            onClick={() => setShowFullDescription(!showFullDescription)}
+                            className="text-blue-600 font-medium mt-2 flex items-center"
+                        >
+                            {showFullDescription ? (
+                                <>
+                                    Show less <ChevronUp className="ml-1 w-4 h-4" />
+                                </>
+                            ) : (
+                                <>
+                                    Read more <ChevronDown className="ml-1 w-4 h-4" />
+                                </>
+                            )}
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Reviews section */}
+            <div className="mb-12">
+                <ReviewSection reviews={reviews} />
+            </div>
+
+            {/* Related products section */}
+            <div className="mb-12">
+                <RelatedProducts products={relatedProducts} />
+            </div>
+
+            {/* FAQ section */}
+            <div className="mb-12">
+                <FAQ />
+            </div>
+
+            {/* Recent products section */}
+            <div>
+                <RecentProducts currentProductId={product._id} />
+            </div>
         </div>
     )
 }
@@ -270,16 +356,18 @@ function LoadingState() {
             <div className="animate-pulse">
                 <div className="grid md:grid-cols-2 gap-8">
                     <div className="space-y-4">
-                        <div className="aspect-w-3 aspect-h-2 bg-gray-300 rounded-lg"></div>
-                        <div className="grid grid-cols-3 gap-2">
-                            <div className="aspect-w-1 aspect-h-1 bg-gray-300 rounded-lg"></div>
-                            <div className="aspect-w-1 aspect-h-1 bg-gray-300 rounded-lg"></div>
-                            <div className="aspect-w-1 aspect-h-1 bg-gray-300 rounded-lg"></div>
+                        <div className="aspect-square bg-gray-300 rounded-lg"></div>
+                        <div className="flex gap-2">
+                            <div className="w-20 h-20 bg-gray-300 rounded-md"></div>
+                            <div className="w-20 h-20 bg-gray-300 rounded-md"></div>
+                            <div className="w-20 h-20 bg-gray-300 rounded-md"></div>
                         </div>
                     </div>
                     <div className="space-y-6">
                         <div className="h-8 bg-gray-300 rounded w-3/4"></div>
-                        <div className="h-20 bg-gray-300 rounded"></div>
+                        <div className="flex">
+                            <div className="h-5 w-24 bg-gray-300 rounded"></div>
+                        </div>
                         <div className="h-8 bg-gray-300 rounded w-1/4"></div>
                         <div className="space-y-2">
                             <div className="h-6 bg-gray-300 rounded w-1/4"></div>
@@ -294,11 +382,14 @@ function LoadingState() {
                             <div className="flex space-x-2">
                                 <div className="h-8 w-24 bg-gray-300 rounded-full"></div>
                                 <div className="h-8 w-24 bg-gray-300 rounded-full"></div>
-                                <div className="h-8 w-24 bg-gray-300 rounded-full"></div>
                             </div>
                         </div>
-                        <div className="h-10 bg-gray-300 rounded w-1/3"></div>
+                        <div className="h-12 bg-gray-300 rounded w-full"></div>
                     </div>
+                </div>
+                <div className="mt-12 space-y-4">
+                    <div className="h-8 bg-gray-300 rounded w-1/4"></div>
+                    <div className="h-24 bg-gray-300 rounded"></div>
                 </div>
             </div>
         </div>
@@ -320,6 +411,7 @@ function ErrorState({ error }: { error: string | null }) {
 function RecentProducts({ currentProductId }: { currentProductId: string }) {
     const [recentProducts, setRecentProducts] = useState<Product[]>([])
     const { toast } = useToast()
+
     useEffect(() => {
         const fetchRecentProducts = async () => {
             try {
@@ -352,13 +444,17 @@ function RecentProducts({ currentProductId }: { currentProductId: string }) {
         fetchRecentProducts()
     }, [currentProductId, toast])
 
+    if (recentProducts.length === 0) {
+        return null
+    }
+
     return (
-        <div className="mt-8">
-            <h2 className="text-xl font-bold mb-4 px-4">Recent Products</h2>
-            <div className="grid grid-cols-2 gap-3 px-4 sm:grid-cols-4 sm:gap-4">
-                {recentProducts.slice(0, 4).map((product) => (
+        <div>
+            <h2 className="text-2xl font-bold mb-6">Recently Viewed Products</h2>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {recentProducts.map((product) => (
                     <Link href={`/user/productDetail/${product._id}`} key={product._id}>
-                        <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow h-full">
                             <div className="relative aspect-square">
                                 <Image
                                     src={product.images[0]?.url || "/placeholder.svg"}
@@ -367,9 +463,9 @@ function RecentProducts({ currentProductId }: { currentProductId: string }) {
                                     className="object-cover rounded-t-lg"
                                 />
                             </div>
-                            <div className="p-2 sm:p-3">
+                            <div className="p-3">
                                 <h3 className="font-medium text-sm sm:text-base truncate">{product.name}</h3>
-                                <p className="text-sm font-semibold text-gray-900">Rs {product.price.toFixed(2)}</p>
+                                <p className="text-sm font-semibold text-gray-900 mt-1">Rs {product.price.toFixed(2)}</p>
                             </div>
                         </div>
                     </Link>
@@ -415,21 +511,25 @@ function FAQ() {
     ]
 
     return (
-        <div className="mt-12">
+        <div>
             <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
             <div className="space-y-4">
                 {faqs.map((faq, index) => (
-                    <div key={index} className="border rounded-lg">
+                    <div key={index} className="border rounded-lg overflow-hidden">
                         <button
-                            className="flex justify-between items-center w-full p-4 text-left"
+                            className="flex justify-between items-center w-full p-4 text-left font-medium hover:bg-gray-50 transition-colors"
                             onClick={() => toggleQuestion(index)}
                         >
-                            <span className="font-semibold">{faq.question}</span>
-                            {openIndex === index ? <ChevronUp /> : <ChevronDown />}
+                            <span>{faq.question}</span>
+                            {openIndex === index ? (
+                                <ChevronUp className="flex-shrink-0" />
+                            ) : (
+                                <ChevronDown className="flex-shrink-0" />
+                            )}
                         </button>
                         {openIndex === index && (
-                            <div className="p-4 bg-gray-50">
-                                <p>{faq.answer}</p>
+                            <div className="p-4 bg-gray-50 border-t">
+                                <p className="text-gray-700">{faq.answer}</p>
                             </div>
                         )}
                     </div>
@@ -447,62 +547,58 @@ function RelatedProducts({ products }: { products: Product[] }) {
     }
 
     return (
-        <section className="py-8">
-            <div className=" ">
-                <div className="px-4 mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">Related Products</h2>
-                    <p className="mt-1 text-sm text-gray-600">Products you might also like</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3 px-4 sm:grid-cols-4 sm:gap-4">
-                    {uniqueProducts.map((product) => (
-                        <Link href={`/user/productDetail/${product._id}`} key={product._id} className="group">
-                            <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-                                <div className="relative aspect-square">
-                                    <Image
-                                        src={product.images[0]?.url || "/placeholder.svg"}
-                                        alt={product.name}
-                                        fill
-                                        className="object-cover rounded-t-lg group-hover:scale-105 transition-transform duration-300"
-                                    />
-                                    {product.stock <= 0 && (
-                                        <div className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded">
-                                            Out of Stock
-                                        </div>
-                                    )}
-                                    {product.stock > 0 && product.stock <= 5 && (
-                                        <div className="absolute top-1 right-1 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded">
-                                            Low Stock
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="p-2 sm:p-3">
-                                    <h3 className="font-medium text-sm sm:text-base truncate">{product.name}</h3>
-                                    <div className="flex items-center justify-between mt-1">
-                                        <p className="text-sm font-semibold text-gray-900">Rs {product.price.toLocaleString()}</p>
-                                        {product.stock > 0 && <span className="text-xs text-gray-500">{product.stock} left</span>}
+        <div>
+            <h2 className="text-2xl font-bold mb-4">Related Products</h2>
+            <p className="text-gray-600 mb-6">You might also like these products</p>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {uniqueProducts.map((product) => (
+                    <Link href={`/user/productDetail/${product._id}`} key={product._id} className="group shadow-lg">
+                        <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow h-full">
+                            <div className="relative aspect-[14/9] overflow-hidden rounded-t-lg">
+                                <Image
+                                    src={product.images[0]?.url || "/placeholder.svg"}
+                                    alt={product.name}
+                                    fill
+                                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                {product.stock <= 0 && (
+                                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                        Out of Stock
                                     </div>
-                                    <div className="mt-2 flex flex-wrap gap-1">
-                                        {product.sizes.slice(0, 2).map((size) => (
-                                            <span
-                                                key={size}
-                                                className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium text-gray-600 bg-gray-100 rounded"
-                                            >
-                                                {size}
-                                            </span>
-                                        ))}
-                                        {product.sizes.length > 2 && (
-                                            <span className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium text-gray-600 bg-gray-100 rounded">
-                                                +{product.sizes.length - 2}
-                                            </span>
-                                        )}
+                                )}
+                                {product.stock > 0 && product.stock <= 5 && (
+                                    <div className="absolute top-2 right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
+                                        Low Stock
                                     </div>
+                                )}
+                            </div>
+                            <div className="p-3">
+                                <h3 className="font-medium text-sm sm:text-base ">{product.name}</h3>
+                                {/* <div className="flex items-center justify-between mt-2">
+                                    <p className="text-sm font-semibold text-gray-900">Rs {product.price.toLocaleString()}</p>
+                                    {product.stock > 0 && <span className="text-xs text-gray-500">{product.stock} left</span>}
+                                </div> */}
+                                <div className="mt-2 flex flex-wrap gap-1">
+                                    {product.sizes.slice(0, 2).map((size) => (
+                                        <span
+                                            key={size}
+                                            className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium text-gray-600 bg-gray-100 rounded"
+                                        >
+                                            {size}
+                                        </span>
+                                    ))}
+                                    {product.sizes.length > 2 && (
+                                        <span className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium text-gray-600 bg-gray-100 rounded">
+                                            +{product.sizes.length - 2}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
-                        </Link>
-                    ))}
-                </div>
+                        </div>
+                    </Link>
+                ))}
             </div>
-        </section>
+        </div>
     )
 }
 

@@ -2,7 +2,7 @@
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -78,9 +78,9 @@ export default function ProductGrid() {
                 <h2 className="text-2xl font-bold mb-6">Featured Products</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {visibleProducts.map((product) => (
-                        <Card key={product._id} className="flex flex-col">
+                        <Card key={product._id} className="flex flex-col shadow-lg hover:shadow-2xl">
                             <CardHeader>
-                                <div className="aspect-square relative overflow-hidden rounded-t-lg">
+                                <div className="aspect-[7/6] relative overflow-hidden rounded-t-lg">
                                     <Image
                                         src={product.images[0]?.url || "/placeholder.svg"}
                                         alt={product.name}
@@ -91,12 +91,11 @@ export default function ProductGrid() {
                                 </div>
                             </CardHeader>
                             <CardContent className="flex-grow">
-                                <CardTitle className="mb-2">{product.name}</CardTitle>
-                                <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
+                                <p className=" text-lg line-clamp-1">{product.name}</p>
                             </CardContent>
                             <CardFooter className="flex flex-col md:flex-row justify-between items-center">
-                                <span className="font-bold">Rs {product.price.toFixed(2)}</span>
-                                <Link href={`/user/productDetail/${product._id}`}>
+                                <span className="font-bold text-xl">Rs {product.price.toFixed(2)}</span>
+                                <Link href={`/user/productDetail/${product._id}`} className="text-green-600 text-lg">
                                     <Button className="bg-[#9ACA3C] hover:bg-[#3A3A3A]" size="sm">
                                         View Details
                                     </Button>
