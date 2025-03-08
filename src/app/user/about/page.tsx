@@ -89,7 +89,7 @@ export default function AboutPage() {
                         <div className="order-1 md:order-2">
                             <div className="aspect-[4/5] relative rounded-lg overflow-hidden shadow-2xl">
                                 <Image
-                                    src="/dall1.png"
+                                    src="/mb1.jpg"
                                     alt="Our CEO"
                                     layout="fill"
                                     objectFit="cover"
