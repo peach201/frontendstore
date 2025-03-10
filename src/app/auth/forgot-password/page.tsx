@@ -44,18 +44,21 @@ export default function ForgotPasswordPage() {
                     title: "Error",
                     description: "Request failed" + data.message,
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
             toast({
                 title: "Email Sent",
                 description: "Check your email for password reset instructions",
+                duration: 1000,
             });
         } catch (error: unknown) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "An error occurred",
+                duration: 1000,
             });
         } finally {
             setIsLoading(false);

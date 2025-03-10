@@ -50,6 +50,7 @@ export default function Sales() {
                     title: "Error",
                     description: "Failed to fetch sales stats",
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
             const data = await response.json()
@@ -61,6 +62,7 @@ export default function Sales() {
                 title: "Error",
                 description: "Failed to load sales data. Please try again later.",
                 variant: "destructive",
+                duration: 1000,
             })
         } finally {
             setIsLoading(false)

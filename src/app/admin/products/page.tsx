@@ -80,6 +80,7 @@ export default function ProductsPage() {
                     title: "Error",
                     description: "Failed to fetch products",
                     variant: "destructive",
+                    duration: 1000,
                 });
                 return;
             }
@@ -96,6 +97,7 @@ export default function ProductsPage() {
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to fetch products",
+                duration: 1000,
             });
         } finally {
             setIsLoading(false);
@@ -114,6 +116,7 @@ export default function ProductsPage() {
                     title: "Error",
                     description: "Failed to fetch categories",
                     variant: "destructive",
+                    duration: 1000,
                 });
                 return;
             }
@@ -124,6 +127,7 @@ export default function ProductsPage() {
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to fetch categories",
+                duration: 1000,
             });
         }
     }, [toast]);
@@ -159,7 +163,7 @@ export default function ProductsPage() {
 
         sizes.forEach(size => formData.append("sizes[]", size))
         categories.forEach(category => formData.append("categories[]", category))
-        
+
         setIsLoading(true)
         try {
             const response = await fetch(`${API_URL}/api/products`, {
@@ -175,6 +179,7 @@ export default function ProductsPage() {
                     title: "Error",
                     description: "Failed to add product" + data.message,
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
@@ -182,16 +187,18 @@ export default function ProductsPage() {
             fetchProducts()
             if (response.ok) {
                 toast({
-                title: "Success",
-                description: "Product added successfully",
-            })
+                    title: "Success",
+                    description: "Product added successfully",
+                    duration: 1000,
+                })
             }
-           
+
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to add product",
+                duration: 1000,
             })
         } finally {
             setIsLoading(false)
@@ -226,6 +233,7 @@ export default function ProductsPage() {
                     title: "Error",
                     description: `Failed to update product: ${data.message || "Unknown error occurred"}`,
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
@@ -236,12 +244,14 @@ export default function ProductsPage() {
             toast({
                 title: "Success",
                 description: "Product updated successfully",
+                duration: 1000,
             })
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to update product",
+                duration: 1000,
             })
         } finally {
             setIsLoading(false)
@@ -271,6 +281,7 @@ export default function ProductsPage() {
                     title: "Error",
                     description: errorMessage,
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
@@ -280,12 +291,14 @@ export default function ProductsPage() {
             toast({
                 title: "Success",
                 description: "Product deleted successfully",
+                duration: 1000,
             })
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to delete product",
+                duration: 1000,
             })
         } finally {
             setIsLoading(false)
@@ -306,6 +319,7 @@ export default function ProductsPage() {
                     title: "Error",
                     description: "Failed to delete image" + data.message,
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
@@ -319,12 +333,14 @@ export default function ProductsPage() {
             toast({
                 title: "Success",
                 description: "Image deleted successfully",
+                duration: 1000,
             })
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to delete image",
+                duration: 1000,
             })
         } finally {
             setIsLoading(false)
@@ -563,7 +579,7 @@ export default function ProductsPage() {
             </div>
 
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                <DialogContent className="max-w-4xl">                 
+                <DialogContent className="max-w-4xl">
                     <DialogHeader>
                         <DialogTitle>Edit Product</DialogTitle>
                     </DialogHeader>

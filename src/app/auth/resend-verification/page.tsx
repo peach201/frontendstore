@@ -43,6 +43,7 @@ export default function ResendVerificationPage() {
                     title: "Error",
                     description: "Request failed" + data.message,
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
@@ -50,12 +51,14 @@ export default function ResendVerificationPage() {
             toast({
                 title: "Email Sent",
                 description: "Verification email has been resent",
+                duration: 1000,
             });
         } catch (error: unknown) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "An unexpected error occurred",
+                duration: 1000,
             });
         } finally {
             setIsLoading(false);

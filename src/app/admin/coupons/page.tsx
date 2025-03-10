@@ -55,6 +55,8 @@ export default function Coupons() {
                     title: "Error",
                     description: "No coupon found",
                     variant: "destructive",
+                    duration: 1000,
+
                 });
             }
 
@@ -64,6 +66,8 @@ export default function Coupons() {
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to fetch coupons",
+                duration: 1000,
+
             });
         } finally {
             setIsLoading(false);
@@ -95,6 +99,7 @@ export default function Coupons() {
                     title: "Error",
                     description: "Failed to add coupon",
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
@@ -103,12 +108,14 @@ export default function Coupons() {
             toast({
                 title: "Success",
                 description: "Coupon added successfully",
+                duration: 1000,
             })
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to add coupon",
+                duration: 1000,
             })
         } finally {
             setIsLoading(false)
@@ -129,6 +136,7 @@ export default function Coupons() {
                 variant: "destructive",
                 title: "Error",
                 description: "Please enter valid dates",
+                duration: 1000,
             })
             return
         }
@@ -150,6 +158,7 @@ export default function Coupons() {
                     title: "Error",
                     description: "Failed to update coupon",
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
@@ -158,12 +167,14 @@ export default function Coupons() {
             toast({
                 title: "Success",
                 description: "Coupon updated successfully",
+                duration: 1000,
             })
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to update coupon",
+                duration: 1000,
             })
         } finally {
             setIsLoading(false)
@@ -186,6 +197,7 @@ export default function Coupons() {
                     title: "Error",
                     description: "Failed to delete coupon",
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
@@ -193,12 +205,14 @@ export default function Coupons() {
             toast({
                 title: "Success",
                 description: "Coupon deleted successfully",
+                duration: 1000,
             })
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to delete coupon",
+                duration: 1000,
             })
         } finally {
             setIsLoading(false)

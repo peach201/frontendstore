@@ -84,6 +84,7 @@ export default function ProductPage() {
                         title: "Error",
                         description: "Failed to fetch related products",
                         variant: "destructive",
+                        duration: 1000,
                     })
                 }
                 const data = await res.json()
@@ -92,6 +93,7 @@ export default function ProductPage() {
                         title: "Error",
                         description: "Failed to fetch related products",
                         variant: "destructive",
+                        duration: 1000,
                     })
                 }
                 // Store all products except current one
@@ -102,6 +104,7 @@ export default function ProductPage() {
                     title: "Error",
                     description: "Error fetching related products: " + (err instanceof Error ? err.message : "Unknown error"),
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
         },
@@ -123,6 +126,7 @@ export default function ProductPage() {
                         title: "Error",
                         description: "Failed to fetch product or reviews",
                         variant: "destructive",
+                        duration: 1000,
                     })
                 }
 
@@ -134,6 +138,7 @@ export default function ProductPage() {
                         title: "Error",
                         description: "Failed to fetch product or reviews" + productData.message || reviewsData.message,
                         variant: "destructive",
+                        duration: 1000,
                     })
                 }
 
@@ -166,6 +171,7 @@ export default function ProductPage() {
                 title: "Error",
                 description: `Cannot add more items. Maximum stock (${product.stock}) reached.`,
                 variant: "destructive",
+                duration: 1000,
             })
             return
         }
@@ -182,6 +188,7 @@ export default function ProductPage() {
         toast({
             title: "Success",
             description: "Added to cart successfully",
+            duration: 1000,
         })
     }
 
@@ -200,18 +207,19 @@ export default function ProductPage() {
     return (
         <div className="container mx-auto px-4 py-8 w-full">
             {/* Main product section - Image left, details right */}
-            <div className="grid md:grid-cols-2 gap-8 mb-12 w-full">
+            <div className=" grid grid-cols-1 md:grid-cols-2 items-start gap-8 mb-12 w-full">
                 {/* Left side - Product images */}
-                <div className="space-y-5 w-[1/3]">
-                    <div className="aspect-[16/10] rounded-lg overflow-hidden border">
+                <div className="flex flex-col items-center w-[1/2] gap-6">
+                    <div className="rounded-lg border flex items-center justify-center bg-white  p-2   relative w-fit h-fit">
                         <Image
                             src={selectedImage || "/placeholder.svg"}
                             alt={product.name}
-                            width={600}
-                            height={600}
-                            className="object-cover w-full h-full"
+                            width={500}
+                            height={500}
+                            className="object-contain w-96 h-96 max-w-full max-h-full rounded-lg"
                         />
                     </div>
+
                     <div className="flex overflow-x-auto gap-2 pb-2 hide-scrollbar">
                         {product.images.map((image) => (
                             <div
@@ -233,7 +241,7 @@ export default function ProductPage() {
                 </div>
 
                 {/* Right side - Product details */}
-                <div className="space-y-6">
+                <div className="space-y-6 w-[1/2]">
                     <h1 className="text-3xl font-bold">{product.name}</h1>
 
                     {/* Rating display */}
@@ -243,9 +251,9 @@ export default function ProductPage() {
                                 <Star
                                     key={star}
                                     className={`w-5 h-5 ${star <=
-                                            (reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0)
-                                            ? "text-yellow-400 fill-current"
-                                            : "text-gray-300"
+                                        (reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0)
+                                        ? "text-yellow-400 fill-current"
+                                        : "text-gray-300"
                                         }`}
                                 />
                             ))}
@@ -257,49 +265,59 @@ export default function ProductPage() {
                         </span>
                     </div>
 
-                    <div className="text-2xl font-semibold">Rs {product.price.toFixed(2)}</div>
+                    <div className="w-full flex justify-between items-center p-auto">
 
-                    {/* Sizes */}
-                    <div>
-                        <h2 className="text-lg font-semibold mb-2">Sizes:</h2>
-                        <div className="flex flex-wrap gap-2">
-                            {product.sizes.map((size) => (
-                                <span key={size} className="px-3 py-1 border rounded-full text-sm">
-                                    {size}
-                                </span>
-                            ))}
+                        <div className="text-2xl font-semibold">Rs {product.price.toFixed(2)}</div>
+
+                        <div className="h-16 border border-4x "></div>
+                        
+                        {/* Sizes */}
+                        <div>
+                            <h2 className="text-lg font-semibold mb-2">Sizes:</h2>
+                            <div className="flex flex-wrap gap-2">
+                                {product.sizes.map((size) => (
+                                    <span key={size} className="px-3 py-1 border rounded-full text-sm">
+                                        {size}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
+
+                      
                     </div>
 
-                    {/* Categories */}
-                    <div>
-                        <h2 className="text-lg font-semibold mb-2">Categories:</h2>
-                        <div className="flex flex-wrap gap-2">
-                            {product.categories.map((category) => (
-                                <span key={category._id} className="px-3 py-1 bg-gray-200 rounded-full text-sm">
-                                    {category.name}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Stock information */}
-                    {product.stock > 0 && (
-                        <p className="text-sm text-gray-600">
-                            {product.stock <= 5 ? `Only ${product.stock} left in stock - order soon` : "In stock"}
-                        </p>
-                    )}
                     
+                        {/* Categories */}
+                        <div>
+                            <h2 className="text-lg font-semibold mb-2">Categories:</h2>
+                            <div className="flex flex-wrap gap-2">
+                                {product.categories.map((category) => (
+                                    <span key={category._id} className="px-3 py-1 bg-gray-200 rounded-full text-sm">
+                                        {category.name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                        {/* Stock information */}
+                        {product.stock > 0 && (
+                            <p className="text-sm text-gray-600">
+                                {product.stock <= 5 ? `Only ${product.stock} left in stock - order soon` : "In stock"}
+                            </p>
+                        )}
+                  
+
+
+
                     {/* Add to cart button */}
                     <button
                         onClick={handleAddToCart}
-                        className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                        className=" bg-blue-600 w-40 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                         disabled={product.stock === 0}
                     >
                         {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
                     </button>
 
-                    
+
                 </div>
             </div>
 
@@ -307,7 +325,7 @@ export default function ProductPage() {
             <div className="mb-12">
                 <h2 className="text-2xl font-bold mb-4">Product Description</h2>
                 <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-gray-700">{showFullDescription ? product.description : truncatedDescription}</p>
+                    <p className="text-gray-700 whitespace-pre-line">{showFullDescription ? product.description : truncatedDescription}</p>
                     {product.description.length > 150 && (
                         <button
                             onClick={() => setShowFullDescription(!showFullDescription)}
@@ -421,6 +439,7 @@ function RecentProducts({ currentProductId }: { currentProductId: string }) {
                         title: "Error",
                         description: "Failed to fetch recent products",
                         variant: "destructive",
+                        duration: 1000,
                     })
                 }
                 const data = await res.json()
@@ -429,6 +448,7 @@ function RecentProducts({ currentProductId }: { currentProductId: string }) {
                         title: "Error",
                         description: "Failed to fetch recent products",
                         variant: "destructive",
+                        duration: 1000,
                     })
                 }
                 setRecentProducts(data.data.filter((product: Product) => product._id !== currentProductId).slice(0, 4))
@@ -437,6 +457,7 @@ function RecentProducts({ currentProductId }: { currentProductId: string }) {
                     title: "Error",
                     description: "Error fetching recent products: " + (err instanceof Error ? err.message : "Unknown error"),
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
         }
@@ -573,7 +594,7 @@ function RelatedProducts({ products }: { products: Product[] }) {
                                 )}
                             </div>
                             <div className="p-3">
-                                <h3 className="font-medium text-sm sm:text-base ">{product.name}</h3>
+                                <h3 className="font-medium text-sm sm:text-base line-clamp-2">{product.name}</h3>
                                 {/* <div className="flex items-center justify-between mt-2">
                                     <p className="text-sm font-semibold text-gray-900">Rs {product.price.toLocaleString()}</p>
                                     {product.stock > 0 && <span className="text-xs text-gray-500">{product.stock} left</span>}

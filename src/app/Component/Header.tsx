@@ -80,6 +80,7 @@ export default function Header() {
                     title: "Error",
                     description: "Auth check failed: " + errorMessage,
                     variant: "destructive",
+                    duration: 1000,
                 })
             } finally {
                 setIsLoading(false)
@@ -102,6 +103,7 @@ export default function Header() {
                 router.push("/auth/login")
                 toast({
                     title: "Logged out successfully",
+                    duration: 1000,
                 })
             }
         } catch {
@@ -109,6 +111,7 @@ export default function Header() {
                 variant: "destructive",
                 title: "Logout failed",
                 description: "Please try again",
+                duration: 1000,
             })
         }
     }
@@ -233,9 +236,7 @@ export default function Header() {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem asChild>
-                                        <Link href="/profile">Profile</Link>
-                                    </DropdownMenuItem>
+                                  
                                     <DropdownMenuItem asChild>
                                         <Link href="/user/myOrders">My Orders</Link>
                                     </DropdownMenuItem>

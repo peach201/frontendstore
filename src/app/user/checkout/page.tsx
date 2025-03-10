@@ -94,7 +94,7 @@ export default function CheckoutPage() {
             toast({
                 title: "Error",
                 description: "Failed to fetch shipping cost. Using default value.",
-                duration: 3000,
+                duration: 1000,
                 variant: "destructive",
             });
         }
@@ -135,7 +135,7 @@ export default function CheckoutPage() {
                 toast({
                     title: "Coupon applied!",
                     description: `You saved Rs ${data.data.discount.toFixed(2)}`,
-                    duration: 3000,
+                    duration: 1000,
                 })
                 setCouponCode(data.data.code)
             } else {
@@ -143,7 +143,7 @@ export default function CheckoutPage() {
                 toast({
                     title: "Coupon Rejected!",
                     description: data.message,
-                    duration: 3000,
+                    duration: 1000,
                     variant: "destructive",
                 })
                 setDiscount(previousDiscount)
@@ -154,7 +154,7 @@ export default function CheckoutPage() {
             toast({
                 title: "Coupon Rejected!",
                 description: `${error}`,
-                duration: 3000,
+                duration: 1000,
             })
             setError("Failed to apply coupon. Please try again.")
             setDiscount(previousDiscount)
@@ -184,7 +184,7 @@ export default function CheckoutPage() {
                 toast({
                     title: "Validation Error",
                     description: "Please fill in all the required fields.",
-                    duration: 3000,
+                    duration: 1000,
                     variant: "destructive",
                 })
                 setIsLoading(false)
@@ -236,14 +236,14 @@ export default function CheckoutPage() {
                 toast({
                     title: "Order Rejected!",
                     description: `${data.message}`,
-                    duration: 3000,
+                    duration: 1000,
                 })
             }
         } catch (error) {
             toast({
                 title: "Order Rejected!",
                 description: `${error}`,
-                duration: 3000,
+                duration: 1000,
             })
             setError("An unexpected error occurred. Please try again later.")
         } finally {

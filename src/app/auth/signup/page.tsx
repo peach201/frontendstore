@@ -52,18 +52,21 @@ export default function SignupPage() {
                     title: "Error",
                     description: "Signup failed" + data.message,
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
             toast({
                 title: "Verification Email Sent",
                 description: "Please check your email to verify your account",
+                duration: 1000,
             });
         } catch (error: unknown) {
             toast({
                 variant: "destructive",
                 title: "Signup Error",
                 description: error instanceof Error ? error.message : "An unknown error occurred",
+                duration: 1000,
             });
         } finally {
             setIsLoading(false);

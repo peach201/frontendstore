@@ -69,6 +69,7 @@ export default function Reviews() {
                 title: "Error",
                 description: "Failed to fetch reviews. Please try again.",
                 variant: "destructive",
+                duration: 1000,
             });
         }
     }, [currentPage, searchTerm, toast]); // Dependencies added to keep it stable
@@ -92,12 +93,14 @@ export default function Reviews() {
                 toast({
                     title: "Success",
                     description: `Review ${isApproved ? "approved" : "unapproved"} successfully.`,
+                    duration: 1000,
                 })
             } else {
                 toast({
                     title: "Error",
                     description: "Failed to update review approval",
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
         } catch  {
@@ -105,6 +108,7 @@ export default function Reviews() {
                 title: "Error",
                 description: "Failed to update review approval. Please try again.",
                 variant: "destructive",
+                duration: 1000,
             })
         }
     }
@@ -120,12 +124,14 @@ export default function Reviews() {
                 toast({
                     title: "Success",
                     description: "Review deleted successfully.",
+                    duration: 1000,
                 })
             } else {
                 toast({
                     title: "Error",
                     description: "Failed to delete review",
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
         } catch  {
@@ -133,6 +139,7 @@ export default function Reviews() {
                 title: "Error",
                 description: "Failed to delete review. Please try again.",
                 variant: "destructive",
+                duration: 1000,
             })
         }
     }

@@ -36,6 +36,7 @@ export function useSearch() {
                         title: "Error",
                         description: "Search failed",
                         variant: "destructive",
+                        duration: 1000,
                     })
                 }
                 const data = await response.json()
@@ -46,6 +47,7 @@ export function useSearch() {
                     title: "Error",
                     description: "Search error: " + errorMessage,
                     variant: "destructive",
+                    duration: 1000,
                 })
                 setSearchResults([])
             } finally {

@@ -66,6 +66,7 @@ export default function Orders() {
                     title: "Error",
                     description: "Error fetching orders: " + data.message,
                     variant: "destructive",
+                    duration: 1000,
                 })
                 return // Stop execution to prevent accessing undefined data.data
             }
@@ -77,6 +78,7 @@ export default function Orders() {
                 title: "Error",
                 description: "Error fetching orders: " + error,
                 variant: "destructive",
+                duration: 1000,
             })
         }
     }, [currentPage, searchTerm, toast])
@@ -141,12 +143,14 @@ export default function Orders() {
                 toast({
                     title: "Order Updated",
                     description: `Order status changed to ${pendingUpdate.status}${pendingUpdate.trackingId ? ` with tracking ID ${pendingUpdate.trackingId}` : ""}.`,
+                    duration: 1000,
                 })
             } else {
                 toast({
                     title: "Error",
                     description: "Failed to update order",
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
         } catch {
@@ -154,6 +158,7 @@ export default function Orders() {
                 title: "Error",
                 description: "Failed to update order status. Please try again.",
                 variant: "destructive",
+                duration: 1000,
             })
         } finally {
             setIsConfirmDialogOpen(false)

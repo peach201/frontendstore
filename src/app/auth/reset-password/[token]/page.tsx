@@ -49,12 +49,14 @@ export default function ResetPasswordPage() {
                     title: "Error",
                     description: "Reset failed" + data.message,
                     variant: "destructive",
+                    duration: 1000,
                 })
             }
 
             toast({
                 title: "Password Updated",
                 description: "Your password has been reset successfully",
+                duration: 1000,
             });
             router.push("/auth/login");
         } catch (error: unknown) {
@@ -62,6 +64,7 @@ export default function ResetPasswordPage() {
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "An error occurred",
+                duration: 1000,
             });
         } finally {
             setIsLoading(false);

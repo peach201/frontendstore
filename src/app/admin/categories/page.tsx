@@ -50,7 +50,7 @@ export default function StoreSettings() {
                     title: "Error",
                     description: "Failed to fetch categories",
                     variant: "destructive",
-                    duration: 4000,
+                    duration: 1000,
                 })
             }
 
@@ -60,7 +60,7 @@ export default function StoreSettings() {
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to fetch categories",
-                duration: 4000,
+                duration: 1000,
             })
         } finally {
             setIsLoading(false)
@@ -79,7 +79,7 @@ export default function StoreSettings() {
                     title: "Error",
                     description: "Failed to fetch shipping",
                     variant: "destructive",
-                    duration: 4000,
+                    duration: 1000,
                 })
             }
 
@@ -90,7 +90,7 @@ export default function StoreSettings() {
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to fetch settings",
-                duration: 4000,
+                duration: 1000,
             })
         }
     }, [toast])
@@ -111,14 +111,14 @@ export default function StoreSettings() {
                 toast({
                     title: "Success",
                     description: "Category deleted successfully",
-                    duration: 4000,
+                    duration: 1000,
                 })
             } else {
                 toast({
                     title: "Error",
                     description: "Failed to delete category",
                     variant: "destructive",
-                    duration: 4000,
+                    duration: 1000,
                 })
             }
         } catch (error) {
@@ -126,7 +126,7 @@ export default function StoreSettings() {
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to delete category",
-                duration: 4000,
+                duration: 1000,
             })
         }
     }
@@ -149,14 +149,14 @@ export default function StoreSettings() {
                 toast({
                     title: "Success",
                     description: "Category added successfully",
-                    duration: 4000,
+                    duration: 1000,
                 })
             } else {
                 toast({
                     title: "Error",
                     description: "Failed to add category",
                     variant: "destructive",
-                    duration: 4000,
+                    duration: 1000,
                 })
             }
         } catch (error) {
@@ -164,7 +164,7 @@ export default function StoreSettings() {
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to add category",
-                duration: 4000,
+                duration: 1000,
             })
         }
     }
@@ -188,14 +188,14 @@ export default function StoreSettings() {
                 toast({
                     title: "Success",
                     description: "Category updated successfully",
-                    duration: 4000,
+                    duration: 1000,
                 })
             } else {
                 toast({
                     title: "Error",
                     description: "Failed to update category",
                     variant: "destructive",
-                    duration: 4000,
+                    duration: 1000,
                 })
             }
         } catch (error) {
@@ -203,7 +203,7 @@ export default function StoreSettings() {
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to update category",
-                duration: 4000,
+                duration: 1000,
             })
         }
     }
@@ -226,14 +226,14 @@ export default function StoreSettings() {
                 toast({
                     title: "Success",
                     description: "Shipping fee updated successfully",
-                    duration: 4000,
+                    duration: 1000,
                 })
             } else {
                 toast({
                     title: "Error",
                     description: "Failed to update shipping fee",
                     variant: "destructive",
-                    duration: 4000,
+                    duration: 1000,
                 })
             }
         } catch (error) {
@@ -241,7 +241,7 @@ export default function StoreSettings() {
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to update shipping fee",
-                duration: 4000,
+                duration: 1000,
             })
         }
     }

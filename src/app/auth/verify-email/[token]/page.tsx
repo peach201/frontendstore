@@ -27,6 +27,7 @@ export default function VerifyEmailPage() {
                 variant: "destructive",
                 title: "Verification Error",
                 description: "Missing verification token",
+                duration: 1000,
             });
             setLoading(false);
             return;
@@ -40,17 +41,19 @@ export default function VerifyEmailPage() {
                         title: "Error",
                         description: "Verification failed" + data.message,
                         variant: "destructive",
+                        duration: 1000,
                     })
                 }
 
                 setSuccess(true);
-                toast({ title: "Email Verified Successfully" });
+                toast({ title: "Email Verified Successfully", duration: 1000, });
                 setTimeout(() => router.push("/auth/login"), 3000);
             } catch (error: unknown) {
                 toast({
                     variant: "destructive",
                     title: "Verification Error",
                     description: error instanceof Error ? error.message : "An error occurred",
+                    duration: 1000,
                 });
             } finally {
                 setLoading(false);

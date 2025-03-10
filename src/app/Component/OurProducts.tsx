@@ -78,29 +78,28 @@ export default function ProductGrid() {
                 <h2 className="text-2xl font-bold mb-6">Featured Products</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {visibleProducts.map((product) => (
-                        <Card key={product._id} className="flex flex-col shadow-lg hover:shadow-2xl">
-                            <CardHeader>
-                                <div className="aspect-[7/6] relative overflow-hidden rounded-t-lg">
-                                    <Image
-                                        src={product.images[0]?.url || "/placeholder.svg"}
-                                        alt={product.name}
-                                        width={900}
-                                        height={900}
-                                        className="object-cover w-full h-full"
-                                    />
-                                </div>
-                            </CardHeader>
-                            <CardContent className="flex-grow">
-                                <p className=" text-lg line-clamp-1">{product.name}</p>
-                            </CardContent>
-                            <CardFooter className="flex flex-col md:flex-row justify-between items-center">
-                                <span className="font-bold text-xl">Rs {product.price.toFixed(2)}</span>
-                                <Link href={`/user/productDetail/${product._id}`} className="text-green-600 text-lg">
-                                    <Button className="bg-[#9ACA3C] hover:bg-[#3A3A3A]" size="sm">
-                                        View Details
-                                    </Button>
-                                </Link>
-                            </CardFooter>
+                        <Card key={product._id} className="flex flex-col shadow-xl hover:shadow-3xl">
+                            <Link href={`/user/productDetail/${product._id}`} className=" ">
+                                <CardHeader className="p-0">
+                                    <div className=" relative overflow-hidden rounded-t-lg">
+                                        <Image
+                                            src={product.images[0]?.url || "/placeholder.svg"}
+                                            alt={product.name}
+                                            width={900}
+                                            height={900}
+                                            className="object-cover w-full h-full"
+                                        />
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="flex-grow p-2">
+                                    <p className=" text-md   line-clamp-1">{product.name}</p>
+                                </CardContent>
+                                <CardFooter className="flex flex-col md:flex-row justify-center items-center">
+                                    <span className="font-bold text-md">Rs {product.price.toFixed(2)}</span>
+
+                                </CardFooter>
+
+                            </Link>
                         </Card>
                     ))}
                 </div>
@@ -163,7 +162,7 @@ function NoProducts() {
                         duration: 1,
                     }}
                 >
-                    <Image src="/noproduct.svg" alt="No Products"  height={100} width={100} className="w-64 h-64 mx-auto" />
+                    <Image src="/noproduct.svg" alt="No Products" height={100} width={100} className="w-64 h-64 mx-auto" />
                 </motion.div>
             </motion.div>
         </div>

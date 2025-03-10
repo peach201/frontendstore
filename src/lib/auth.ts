@@ -30,6 +30,7 @@ export async function login(email: string, password: string): Promise<User> {
             title: "Error",
             description: "Login failed" + error.message,
             variant: "destructive",
+            duration: 1000,
         })
     }
 

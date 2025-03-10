@@ -75,6 +75,7 @@ export default function CartPage() {
                     title: "Error",
                     description: verification.error,
                     variant: "destructive",
+                    duration: 1000,
                 })
                 return
             }
@@ -84,6 +85,7 @@ export default function CartPage() {
                     title: "Error",
                     description: "No items available in stock",
                     variant: "destructive",
+                    duration: 1000,
                 })
                 return
             }
@@ -101,6 +103,7 @@ export default function CartPage() {
                 toast({
                     title: "Cart Updated",
                     description: "Some item quantities were adjusted due to stock availability",
+                    duration: 1000,
                 })
                 // Give time for the user to see the changes
                 await new Promise((resolve) => setTimeout(resolve, 1500))
@@ -113,6 +116,7 @@ export default function CartPage() {
                 title: "Error",
                 description: "Failed to process checkout. Please try again.",
                 variant: "destructive",
+                duration: 1000,
             })
         } finally {
             setIsProcessing(false)
