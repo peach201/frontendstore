@@ -92,7 +92,7 @@ export default function ProductGrid() {
                                     </div>
                                 </CardHeader>
                                 <CardContent className="flex-grow p-2">
-                                    <p className=" text-md   line-clamp-1">{product.name}</p>
+                                    <p className=" text-sm md:text-md lg:text-md   line-clamp-1">{product.name}</p>
                                 </CardContent>
                                 <CardFooter className="flex flex-col md:flex-row justify-center items-center">
                                     <span className="font-bold text-md">Rs {product.price.toFixed(2)}</span>
