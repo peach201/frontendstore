@@ -251,9 +251,9 @@ export default function ProductPage() {
                                 <Star
                                     key={star}
                                     className={`w-5 h-5 ${star <=
-                                        (reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0)
-                                        ? "text-yellow-400 fill-current"
-                                        : "text-gray-300"
+                                            (reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0)
+                                            ? "text-yellow-400 fill-current"
+                                            : "text-gray-300"
                                         }`}
                                 />
                             ))}
@@ -266,11 +266,10 @@ export default function ProductPage() {
                     </div>
 
                     <div className="w-full flex justify-between items-center p-auto">
-
                         <div className="text-2xl font-semibold">Rs {product.price.toFixed(2)}</div>
 
                         <div className="h-16 border border-4x "></div>
-                        
+
                         {/* Sizes */}
                         <div>
                             <h2 className="text-lg font-semibold mb-2">Sizes:</h2>
@@ -282,31 +281,25 @@ export default function ProductPage() {
                                 ))}
                             </div>
                         </div>
-
-                      
                     </div>
 
-                    
-                        {/* Categories */}
-                        <div>
-                            <h2 className="text-lg font-semibold mb-2">Categories:</h2>
-                            <div className="flex flex-wrap gap-2">
-                                {product.categories.map((category) => (
-                                    <span key={category._id} className="px-3 py-1 bg-gray-200 rounded-full text-sm">
-                                        {category.name}
-                                    </span>
-                                ))}
-                            </div>
+                    {/* Categories */}
+                    <div>
+                        <h2 className="text-lg font-semibold mb-2">Categories:</h2>
+                        <div className="flex flex-wrap gap-2">
+                            {product.categories.map((category) => (
+                                <span key={category._id} className="px-3 py-1 bg-gray-200 rounded-full text-sm">
+                                    {category.name}
+                                </span>
+                            ))}
                         </div>
-                        {/* Stock information */}
-                        {product.stock > 0 && (
-                            <p className="text-sm text-gray-600">
-                                {product.stock <= 5 ? `Only ${product.stock} left in stock - order soon` : "In stock"}
-                            </p>
-                        )}
-                  
-
-
+                    </div>
+                    {/* Stock information */}
+                    {product.stock > 0 && (
+                        <p className="text-sm text-gray-600">
+                            {product.stock <= 5 ? `Only ${product.stock} left in stock - order soon` : "In stock"}
+                        </p>
+                    )}
 
                     {/* Add to cart button */}
                     <button
@@ -316,8 +309,6 @@ export default function ProductPage() {
                     >
                         {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
                     </button>
-
-
                 </div>
             </div>
 
@@ -325,7 +316,9 @@ export default function ProductPage() {
             <div className="mb-12">
                 <h2 className="text-2xl font-bold mb-4">Product Description</h2>
                 <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-gray-700 whitespace-pre-line">{showFullDescription ? product.description : truncatedDescription}</p>
+                    <p className="text-gray-700 whitespace-pre-line">
+                        {showFullDescription ? product.description : truncatedDescription}
+                    </p>
                     {product.description.length > 150 && (
                         <button
                             onClick={() => setShowFullDescription(!showFullDescription)}
@@ -486,7 +479,12 @@ function RecentProducts({ currentProductId }: { currentProductId: string }) {
                             </div>
                             <div className="p-3">
                                 <h3 className="font-medium text-sm sm:text-base truncate">{product.name}</h3>
-                                <p className="text-sm font-semibold text-gray-900 mt-1">Rs {product.price.toFixed(2)}</p>
+                                <div className="flex items-center gap-1 mt-1">
+                                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                    <span className="text-sm font-medium">{product.ratings}</span>
+                                    {product.numOfReviews > 0 && <span className="text-sm text-gray-500">({product.numOfReviews})</span>}
+                                </div>
+                                <p className="text-sm font-semibold text-red-500 mt-1">Rs {product.price.toFixed(2)}</p>
                             </div>
                         </div>
                     </Link>
@@ -595,10 +593,11 @@ function RelatedProducts({ products }: { products: Product[] }) {
                             </div>
                             <div className="p-3">
                                 <h3 className="font-medium text-sm sm:text-base line-clamp-2">{product.name}</h3>
-                                {/* <div className="flex items-center justify-between mt-2">
-                                    <p className="text-sm font-semibold text-gray-900">Rs {product.price.toLocaleString()}</p>
-                                    {product.stock > 0 && <span className="text-xs text-gray-500">{product.stock} left</span>}
-                                </div> */}
+                                <div className="flex items-center gap-1 mt-1">
+                                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                    <span className="text-sm font-medium">{product.ratings}</span>
+                                    {product.numOfReviews > 0 && <span className="text-sm text-gray-500">({product.numOfReviews})</span>}
+                                </div>
                                 <div className="mt-2 flex flex-wrap gap-1">
                                     {product.sizes.slice(0, 2).map((size) => (
                                         <span

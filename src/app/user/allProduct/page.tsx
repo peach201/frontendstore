@@ -4,9 +4,9 @@ import type React from "react"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import Link from "next/link"
-import { Plus, Grid, List } from "lucide-react"
+import {  Grid, List, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -15,8 +15,8 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import Image from "next/image"
 import { useToast } from "@/components/ui/use-toast"
 import { useDebounce } from "@/hooks/useDebounce"
-import { useCart } from "@/app/Component/CartContext"
-import { useRef } from "react"
+// import { useCart } from "@/app/Component/CartContext"
+// import { useRef } from "react"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
 
@@ -31,6 +31,8 @@ interface Product {
     categories: string[]
     images: { public_id: string; url: string }[]
     slug: string
+    ratings: number
+    numOfReviews: number
 }
 
 interface Category {
@@ -54,14 +56,14 @@ export default function AllProductsPage() {
     const [searchTerm, setSearchTerm] = useState("")
     const [selectedCategories, setSelectedCategories] = useState<string[]>([])
     const [selectedSizes, setSelectedSizes] = useState<string[]>([])
-    const [priceRange, setPriceRange] = useState([0, 10000])
+    const [priceRange, setPriceRange] = useState([0, 1000000])
     const [sortBy, setSortBy] = useState("price_asc")
     const [currentPage, setCurrentPage] = useState(1)
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
     const productsPerPage = 12
     const { toast } = useToast()
-    const { addToCart, cart } = useCart()
-    const processingRef = useRef(false)
+    // const { addToCart, cart } = useCart()
+    // const processingRef = useRef(false)
 
     const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
@@ -161,53 +163,53 @@ export default function AllProductsPage() {
         return filteredAndSortedProducts.slice(indexOfFirstProduct, indexOfLastProduct)
     }, [filteredAndSortedProducts, currentPage])
 
-    const handleAddToCart = (product: Product) => {
-        if (processingRef.current) return
+    // const handleAddToCart = (product: Product) => {
+    //     if (processingRef.current) return
 
-        if (product.stock <= 0) {
-            toast({
-                title: "Error",
-                description: "This product is out of stock",
-                variant: "destructive",
-                 duration: 1000,
-            })
-            return
-        }
+    //     if (product.stock <= 0) {
+    //         toast({
+    //             title: "Error",
+    //             description: "This product is out of stock",
+    //             variant: "destructive",
+    //              duration: 1000,
+    //         })
+    //         return
+    //     }
 
-        const currentCartItem = cart.find((item) => item.id === product._id)
-        const currentQuantity = currentCartItem?.quantity || 0
+    //     const currentCartItem = cart.find((item) => item.id === product._id)
+    //     const currentQuantity = currentCartItem?.quantity || 0
 
-        if (currentQuantity >= product.stock) {
-            toast({
-                title: "Error",
-                description: `Cannot add more items. Maximum stock (${product.stock}) reached.`,
-                variant: "destructive",
-                duration: 1000,
-            })
-            return
-        }
+    //     if (currentQuantity >= product.stock) {
+    //         toast({
+    //             title: "Error",
+    //             description: `Cannot add more items. Maximum stock (${product.stock}) reached.`,
+    //             variant: "destructive",
+    //             duration: 1000,
+    //         })
+    //         return
+    //     }
 
-        processingRef.current = true
+    //     processingRef.current = true
 
-        addToCart({
-            id: product._id,
-            name: product.name,
-            price: product.price,
-            quantity: 1,
-            image: product.images[0]?.url || "/placeholder.svg",
-            stock: product.stock,
-        })
+    //     addToCart({
+    //         id: product._id,
+    //         name: product.name,
+    //         price: product.price,
+    //         quantity: 1,
+    //         image: product.images[0]?.url || "/placeholder.svg",
+    //         stock: product.stock,
+    //     })
 
-        toast({
-            title: "Success",
-            description: "Added to Cart Successfully",
-            duration: 1000,
-        })
+    //     toast({
+    //         title: "Success",
+    //         description: "Added to Cart Successfully",
+    //         duration: 1000,
+    //     })
 
-        setTimeout(() => {
-            processingRef.current = false
-        }, 100)
-    }
+    //     setTimeout(() => {
+    //         processingRef.current = false
+    //     }, 100)
+    // }
 
     const paginate = useCallback((pageNumber: number) => setCurrentPage(pageNumber), [])
 
@@ -335,7 +337,7 @@ export default function AllProductsPage() {
                                         key={product._id}
                                         product={product}
                                         viewMode={viewMode}
-                                        handleAddToCart={handleAddToCart}
+                                       
                                     />
                                 ))}
                             </div>
@@ -449,10 +451,10 @@ function FilterContent({
 interface ProductCardProps {
     product: Product
     viewMode: "grid" | "list"
-    handleAddToCart: (product: Product) => void
+    
 }
 
-function ProductCard({ product, viewMode, handleAddToCart }: ProductCardProps) {
+function ProductCard({ product, viewMode }: ProductCardProps) {
     return (    
          <Link  href={`/user/productDetail/${product._id}`}>
             <Card className={`bg-white overflow-hidden flex ${viewMode === "list" ? "flex-row" : "flex-col"}`}>
@@ -473,30 +475,17 @@ function ProductCard({ product, viewMode, handleAddToCart }: ProductCardProps) {
                     {/* <p className={`text-sm text-gray-500 ${viewMode === "list" ? "" : "line-clamp-2"}`}>{product.description}</p> */}
                     {viewMode === "list" && (
                         <div className="mt-4">
-                            <span className="text-lg font-semibold">Rs {product.price.toFixed(2)}</span>
+                            <span className="text-lg font-semibold text-red-500">Rs {product.price.toFixed(2)}</span>
                         </div>
                     )}
+                    <div className="flex items-center gap-1 mt-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-medium">{product.ratings}</span>
+                        {product.numOfReviews > 0 && <span className="text-sm text-gray-500">({product.numOfReviews})</span>}
+                    </div>
                 </CardContent>
-                <CardFooter
-                    className={` ${viewMode === "list" ? "flex-col items-start" : "flex flex-col  justify-between items-center"}`}
-                >
-                    {viewMode === "grid" && <span className="text-lg font-semibold ">Rs {product.price.toFixed(2)}</span>}
-                    {product.stock > 0 ? (
-                        <Button
-                            variant="default"
-                            size="sm"
-                            className="bg-gray-900 hover:bg-gray-800 "
-                            onClick={() => handleAddToCart(product)}
-                            aria-label={`Add ${product.name} to cart`}
-                        >
-                            <Plus className="mr-2 h-4 w-4" /> Add to Cart
-                        </Button>
-                    ) : (
-                        <Button variant="outline" size="sm" disabled aria-label={`${product.name} is out of stock`}>
-                            Out of Stock
-                        </Button>
-                    )}
-                </CardFooter>
+                    {viewMode === "grid" && <span className="text-lg font-semibold ml-4 text-red-500">Rs {product.price.toFixed(2)}</span>}
+               
             </Card>
             
         </Link>

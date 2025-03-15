@@ -73,11 +73,11 @@ export default function LoginPage() {
                 duration: 1000,
             });
 
-        } catch (error: unknown) {
+        } catch  {
             toast({
                 variant: "destructive",
                 title: "Login Error",
-                description: error instanceof Error ? error.message : "An unknown error occurred",
+                description: "invalid credentials",
                 duration: 1000,
             });
         } finally {

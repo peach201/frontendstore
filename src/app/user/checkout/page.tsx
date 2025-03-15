@@ -175,7 +175,6 @@ export default function CheckoutPage() {
                 !shippingAddress.fullName ||
                 !shippingAddress.address ||
                 !shippingAddress.city ||
-                !shippingAddress.postalCode ||
                 !shippingAddress.country ||
                 !shippingAddress.email ||
                 !shippingAddress.phone
@@ -263,7 +262,7 @@ export default function CheckoutPage() {
                         <form onSubmit={handleSubmit}>
                             <div className="space-y-4">
                                 <div>
-                                    <Label htmlFor="fullName">Full Name</Label>
+                                    <Label htmlFor="fullName">Full Name <span className="text-red-500">*</span></Label>
                                     <Input
                                         type="text"
                                         id="fullName"
@@ -274,7 +273,7 @@ export default function CheckoutPage() {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="email">Email</Label>
+                                    <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
                                     <Input
                                         type="email"
                                         id="email"
@@ -285,7 +284,7 @@ export default function CheckoutPage() {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="phone">Phone Number</Label>
+                                    <Label htmlFor="phone">Phone Number <span className="text-red-500">*</span></Label>
                                     <Input
                                         type="tel"
                                         id="phone"
@@ -296,7 +295,7 @@ export default function CheckoutPage() {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="address">Address</Label>
+                                    <Label htmlFor="address">Address <span className="text-red-500">*</span></Label>
                                     <Input
                                         type="text"
                                         id="address"
@@ -307,7 +306,7 @@ export default function CheckoutPage() {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="city">City</Label>
+                                    <Label htmlFor="city">City <span className="text-red-500">*</span></Label>
                                     <Input
                                         type="text"
                                         id="city"
@@ -325,11 +324,11 @@ export default function CheckoutPage() {
                                         name="postalCode"
                                         value={shippingAddress.postalCode}
                                         onChange={handleInputChange}
-                                        required
+                                        
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="country">Country</Label>
+                                    <Label htmlFor="country">Country <span className="text-red-500">*</span></Label>
                                     <Input
                                         type="text"
                                         id="country"
@@ -340,7 +339,7 @@ export default function CheckoutPage() {
                                     />
                                 </div>
                                 <div className="mt-6">
-                                    <Label>Payment Method</Label>
+                                    <Label>Payment Method <span className="text-red-500">*</span></Label>
                                     <div className="space-y-2 mt-2">
                                         {/* <div className="flex items-center space-x-2">
                                             <input
@@ -354,7 +353,7 @@ export default function CheckoutPage() {
                                             />
                                             <Label htmlFor="payfast">PayFast</Label>
                                         </div> */}
-                                        <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-2 mb-4">
                                             <input
                                                 type="radio"
                                                 id="cod"

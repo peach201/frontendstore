@@ -61,9 +61,9 @@ export default function ProductsPage() {
     const [searchTerm, setSearchTerm] = useState("")
     const [categoryFilter, setCategoryFilter] = useState("all")
     const [minPrice, setMinPrice] = useState(0)
-    const [maxPrice, setMaxPrice] = useState(10000)
+    const [maxPrice, setMaxPrice] = useState(100000000)
     const [minStock, setMinStock] = useState(0)
-    const [maxStock, setMaxStock] = useState(1000)
+    const [maxStock, setMaxStock] = useState(100000000)
     const { toast } = useToast()
 
 

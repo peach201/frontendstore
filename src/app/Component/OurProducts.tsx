@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Star } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -18,6 +19,8 @@ interface Product {
     categories: string[]
     images: { public_id: string; url: string }[]
     slug: string
+    ratings: number
+    numOfReviews: number
 }
 
 export default function ProductGrid() {
@@ -73,39 +76,53 @@ export default function ProductGrid() {
     }
 
     return (
-        <main className="flex  flex-col items-center justify-between px-4">
-            <div className="pb-10">
+        <main className="flex flex-col items-center justify-between px-4">
+            <div className="pb-10 w-full max-w-7xl mx-auto">
                 <h2 className="text-2xl font-bold mb-6">Featured Products</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {visibleProducts.map((product) => (
-                        <Card key={product._id} className="flex flex-col shadow-xl hover:shadow-3xl">
-                            <Link href={`/user/productDetail/${product._id}`} className=" ">
+                        <Link key={product._id} href={`/user/productDetail/${product._id}`} className="block h-full">
+                            <Card className="bg-white overflow-hidden flex flex-col h-full shadow-md hover:shadow-xl transition-shadow duration-300">
                                 <CardHeader className="p-0">
-                                    <div className=" relative overflow-hidden rounded-t-lg">
+                                    <div className="relative aspect-square">
                                         <Image
                                             src={product.images[0]?.url || "/placeholder.svg"}
                                             alt={product.name}
-                                            width={900}
-                                            height={900}
-                                            className="object-cover w-full h-full"
+                                            fill
+                                            className="object-cover"
+                                            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
                                         />
                                     </div>
                                 </CardHeader>
-                                <CardContent className="flex-grow p-2">
-                                    <p className=" text-sm md:text-md lg:text-md   line-clamp-1">{product.name}</p>
-                                </CardContent>
-                                <CardFooter className="flex flex-col md:flex-row justify-center items-center">
-                                    <span className="font-bold text-md">Rs {product.price.toFixed(2)}</span>
-
-                                </CardFooter>
-
-                            </Link>
-                        </Card>
+                                <div className="flex flex-col w-full">
+                                    <CardContent className="flex-1 px-4 py-3">
+                                        <h3 className="font-medium text-gray-900 hover:text-gray-600 transition-colors line-clamp-2">
+                                            {product.name}
+                                        </h3>
+                                        <div className="flex items-center gap-1 mt-1">
+                                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                            <span className="text-sm font-medium">{product.ratings}</span>
+                                            {product.numOfReviews > 0 && (
+                                                <span className="text-sm text-gray-500">({product.numOfReviews})</span>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter className="px-4 pb-3 pt-0">
+                                        <span className="text-lg font-semibold text-red-500">Rs {product.price.toFixed(2)}</span>
+                                    </CardFooter>
+                                </div>
+                            </Card>
+                        </Link>
                     ))}
                 </div>
                 {visibleProducts.length < products.length && (
                     <div className="mt-8 text-center">
-                        <Button className="hover:bg-[#9ACA3C] bg-[#3A3A3A]" onClick={loadMoreProducts}>Load More</Button>
+                        <Button
+                            className="hover:bg-[#9ACA3C] bg-[#3A3A3A] transition-colors duration-300"
+                            onClick={loadMoreProducts}
+                        >
+                            Load More
+                        </Button>
                     </div>
                 )}
             </div>
@@ -130,7 +147,6 @@ function LoadingState() {
                             </div>
                             <div className="mt-4 flex justify-between items-center">
                                 <div className="h-6 bg-gray-300 rounded w-1/4"></div>
-                                <div className="h-8 bg-gray-300 rounded w-1/4"></div>
                             </div>
                         </div>
                     ))}
@@ -139,8 +155,6 @@ function LoadingState() {
         </div>
     )
 }
-
-
 
 function NoProducts() {
     return (
@@ -157,7 +171,7 @@ function NoProducts() {
                     initial={{ y: -10 }}
                     animate={{ y: 10 }}
                     transition={{
-                        repeat: Infinity,
+                        repeat: Number.POSITIVE_INFINITY,
                         repeatType: "reverse",
                         duration: 1,
                     }}
@@ -168,3 +182,4 @@ function NoProducts() {
         </div>
     )
 }
+

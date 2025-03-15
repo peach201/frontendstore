@@ -231,11 +231,13 @@ export default function MyOrdersPage() {
                                     </CollapsibleContent>
                                 </Collapsible>
                             </CardContent>
-                            <CardFooter>
-                                <Button onClick={() => handleReviewClick(order)} className="w-full">
-                                    <Package className="mr-2 h-4 w-4" /> Leave Reviews
-                                </Button>
-                            </CardFooter>
+                            {order.status.toLowerCase() === "delivered" && (
+                                <CardFooter>
+                                    <Button onClick={() => handleReviewClick(order)} className="w-full">
+                                        <Package className="mr-2 h-4 w-4" /> Leave Reviews
+                                    </Button>
+                                </CardFooter>
+                            )}
                         </Card>
                     ))}
                 </div>
