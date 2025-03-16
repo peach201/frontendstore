@@ -108,7 +108,7 @@ export default function ProductGrid() {
                                         </div>
                                     </CardContent>
                                     <CardFooter className="px-4 pb-3 pt-0">
-                                        <span className="text-lg font-semibold text-red-500">Rs {product.price.toFixed(2)}</span>
+                                        <span className="text-md font-semibold text-red-500">Rs {product.price.toFixed(2)}</span>
                                     </CardFooter>
                                 </div>
                             </Card>

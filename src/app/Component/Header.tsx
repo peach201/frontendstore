@@ -35,9 +35,20 @@ export default function Header() {
     const [showSearchResults, setShowSearchResults] = useState(false)
     const [sheetOpen, setSheetOpen] = useState(false)
     const [showMobileSearch, setShowMobileSearch] = useState(false)
+    const [isSearchOpen, setIsSearchOpen] = useState(false)
+
+    // Debug state to check search results
+    interface Product {
+        _id: string;
+        name: string;
+        price: number;
+        images?: Array<{ url: string }>;
+    }
+    const [, setDebugResults] = useState<Product[]>([])
 
     // Ref for search container.
     const searchContainerRef = useRef<HTMLDivElement>(null)
+    const searchInputRef = useRef<HTMLInputElement>(null)
     const mobileSearchRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -90,6 +101,16 @@ export default function Header() {
         checkAuth()
     }, [setUser, toast])
 
+    // Update debug results when searchResults change
+    useEffect(() => {
+        if (searchResults && searchResults.length > 0) {
+            setDebugResults(searchResults)
+            setShowSearchResults(true)
+        } else {
+            setShowSearchResults(false)
+        }
+    }, [searchResults])
+
     const handleLogout = async () => {
         try {
             const response = await fetch(`${API_URL}/api/auth/logout`, {
@@ -124,15 +145,22 @@ export default function Header() {
     ]
 
     // Handle clicks outside the search container.
-    const handleClickOutside = useCallback((event: MouseEvent) => {
-        if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-            setShowSearchResults(false)
-        }
+    const handleClickOutside = useCallback(
+        (event: MouseEvent) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+                setShowSearchResults(false)
+                // Only close search if it's empty
+                if (!searchTerm.trim()) {
+                    setIsSearchOpen(false)
+                }
+            }
 
-        if (mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node)) {
-            setShowMobileSearch(false)
-        }
-    }, [])
+            if (mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node)) {
+                setShowMobileSearch(false)
+            }
+        },
+        [searchTerm],
+    )
 
     useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside)
@@ -141,33 +169,41 @@ export default function Header() {
         }
     }, [handleClickOutside])
 
-    // Show search results when the search term changes and is not empty.
+    // Close search when ESC key is pressed
     useEffect(() => {
-        if (searchTerm.trim() !== "") {
-            setShowSearchResults(true)
-        } else {
-            setShowSearchResults(false)
+        const handleEsc = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setIsSearchOpen(false)
+                setShowSearchResults(false)
+                setSearchTerm("")
+            }
         }
-    }, [searchTerm])
+
+        window.addEventListener("keydown", handleEsc)
+        return () => {
+            window.removeEventListener("keydown", handleEsc)
+        }
+    }, [setSearchTerm])
 
     return (
-        <header className="bg-background sticky top-0 z-40 border-b overflow-hidden">
-            <div className="container mx-auto px-4">
+        <header className="bg-background sticky top-0 z-40 border-b ">
+            <div className="container mx-auto px-4 relative">
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
                     <Link href="/" className="font-bold text-3xl">
-                        <Image src="/logoPeach.jpg" alt="logo" width={100} height={50} />
+                        <Image src="/logoPeach.jpg" alt="logo" width={100} height={30} />
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <nav className="hidden md:flex items-center space-x-6">
+                    <nav className="hidden md:flex items-center justify-center space-x-8 flex-1">
                         {navItems.map((item) => (
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className="text-xl font-medium text-muted-foreground transition-colors hover:text-primary"
+                                className="text-base font-medium text-black transition-colors hover:text-primary relative group"
                             >
                                 {item.label}
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                             </Link>
                         ))}
                     </nav>
@@ -176,32 +212,78 @@ export default function Header() {
                     <div className="flex items-center space-x-4">
                         {/* Desktop Search */}
                         <div className="relative hidden md:block" ref={searchContainerRef}>
-                            <Input
-                                type="search"
-                                placeholder="Search products..."
-                                className="w-[300px]"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                // Show results on focus
-                                onFocus={() => {
-                                    if (searchTerm.trim() !== "") setShowSearchResults(true)
-                                }}
-                            />
-                            {isSearching && <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin" />}
-                            {showSearchResults && searchResults.length > 0 && (
-                                <div className="absolute mt-2 w-full bg-background border rounded-md shadow-lg">
-                                    {/*  eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                    {searchResults.map((product: any) => (
+                            <div className="flex items-center">
+                                {isSearchOpen ? (
+                                    <div className="flex items-center w-[300px] transition-all duration-300">
+                                        <Input
+                                            ref={searchInputRef}
+                                            type="search"
+                                            placeholder="Search products..."
+                                            className="w-full"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="ml-1"
+                                            onClick={() => {
+                                                setSearchTerm("")
+                                                setIsSearchOpen(false)
+                                                setShowSearchResults(false)
+                                            }}
+                                        >
+                                            <X className="h-5 w-5" />
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => {
+                                            setIsSearchOpen(true)
+                                            // Focus will be set after the input renders
+                                            setTimeout(() => {
+                                                if (searchInputRef.current) {
+                                                    searchInputRef.current.focus()
+                                                }
+                                            }, 10)
+                                        }}
+                                    >
+                                        <Search className="h-5 w-5 z-10" />
+                                    </Button>
+                                )}
+                                {isSearching && <Loader2 className="absolute right-10 top-3 h-4 w-4 animate-spin " />}
+                            </div>
+
+                            {isSearchOpen && showSearchResults && searchResults && searchResults.length > 0 && (
+                                <div className="absolute mt-2 w-[300px] right-0 bg-background border rounded-md shadow-lg overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200 z-80">
+                                    {searchResults.map((product: Product) => (
                                         <Link
                                             key={product._id}
                                             href={`/user/productDetail/${product._id}`}
-                                            className="block px-4 py-2 hover:bg-muted"
+                                            className="flex items-center gap-3 p-3 hover:bg-muted transition-colors "
                                             onClick={() => {
                                                 setShowSearchResults(false)
-                                                setSheetOpen(false)
+                                                setSearchTerm("")
+                                                setIsSearchOpen(false)
                                             }}
                                         >
-                                            {product.name}
+                                            {product.images && product.images[0] && (
+                                                <div className="h-12 w-12 rounded overflow-hidden flex-shrink-0">
+                                                    <Image
+                                                        src={product.images[0].url || "/placeholder.svg"}
+                                                        alt={product.name}
+                                                        width={48}
+                                                        height={48}
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-medium truncate">{product.name}</p>
+                                                <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
+                                            </div>
                                         </Link>
                                     ))}
                                 </div>
@@ -214,10 +296,10 @@ export default function Header() {
                         </Button>
 
                         <Link href="/user/cart">
-                            <Button variant="ghost" size="icon" className="relative">
+                            <Button variant="ghost" size="icon" className="relative transition-transform hover:scale-110">
                                 <ShoppingCart className="h-5 w-5" />
                                 {getTotalItems() > 0 && (
-                                    <Badge variant="destructive" className="absolute -top-2 -right-2">
+                                    <Badge variant="destructive" className="absolute -top-2 -right-2 animate-in zoom-in-95 duration-200">
                                         {getTotalItems()}
                                     </Badge>
                                 )}
@@ -228,15 +310,17 @@ export default function Header() {
                         ) : user ? (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                                    <Button
+                                        variant="ghost"
+                                        className="relative h-8 w-8 rounded-full overflow-hidden transition-transform hover:scale-110"
+                                    >
                                         <Avatar className="h-8 w-8">
                                             <AvatarImage src={user.avatar} alt={user.name} />
                                             <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  
+                                <DropdownMenuContent align="end" className="animate-in fade-in-0 zoom-in-95 duration-200">
                                     <DropdownMenuItem asChild>
                                         <Link href="/user/myOrders">My Orders</Link>
                                     </DropdownMenuItem>
@@ -246,9 +330,28 @@ export default function Header() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
-                            <div className="hidden md:flex items-center space-x-2">
-                                <Button asChild>
-                                    <Link href="/auth/login">Login</Link>
+                            <div className="hidden md:block">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="relative overflow-hidden transition-transform hover:scale-110"
+                                    asChild
+                                >
+                                    <Link href="/auth/login">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className="h-5 w-5"
+                                        >
+                                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                    </Link>
                                 </Button>
                             </div>
                         )}
@@ -297,10 +400,10 @@ export default function Header() {
             {/* Mobile Search Popup */}
             {showMobileSearch && (
                 <div
-                    className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-16 px-4"
+                    className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-16 px-4 animate-in fade-in-0 duration-200"
                     ref={mobileSearchRef}
                 >
-                    <div className="w-full max-w-md bg-background border rounded-lg shadow-lg p-4">
+                    <div className="w-full max-w-md bg-background border rounded-lg shadow-lg p-4 animate-in zoom-in-95 duration-200">
                         <div className="flex items-center gap-2 mb-2">
                             <Input
                                 type="search"
@@ -310,7 +413,14 @@ export default function Header() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 autoFocus
                             />
-                            <Button variant="ghost" size="icon" onClick={() => setShowMobileSearch(false)}>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                    setShowMobileSearch(false)
+                                    setSearchTerm("")
+                                }}
+                            >
                                 <X className="h-5 w-5" />
                             </Button>
                         </div>
@@ -321,20 +431,34 @@ export default function Header() {
                             </div>
                         )}
 
-                        {showSearchResults && searchResults.length > 0 && (
+                        {showSearchResults && searchResults && searchResults.length > 0 && (
                             <div className="max-h-[60vh] overflow-auto">
-                                {/*  eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {searchResults.map((product: any) => (
+                                {searchResults.map((product: Product) => (
                                     <Link
                                         key={product._id}
                                         href={`/user/productDetail/${product._id}`}
-                                        className="block px-4 py-3 hover:bg-muted border-b last:border-0"
+                                        className="flex items-center gap-3 p-3 hover:bg-muted transition-colors border-b last:border-0"
                                         onClick={() => {
                                             setShowSearchResults(false)
                                             setShowMobileSearch(false)
+                                            setSearchTerm("")
                                         }}
                                     >
-                                        {product.name}
+                                        {product.images && product.images[0] && (
+                                            <div className="h-12 w-12 rounded overflow-hidden flex-shrink-0">
+                                                <Image
+                                                    src={product.images[0].url || "/placeholder.svg"}
+                                                    alt={product.name}
+                                                    width={48}
+                                                    height={48}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium truncate">{product.name}</p>
+                                            <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
+                                        </div>
                                     </Link>
                                 ))}
                             </div>
@@ -345,4 +469,3 @@ export default function Header() {
         </header>
     )
 }
-

@@ -1,10 +1,9 @@
+"use client"
+
 import { useState, useEffect, useCallback } from "react"
 import { useToast } from "@/components/ui/use-toast"
 
-function debounce<T extends (arg: string) => unknown>(
-    func: T,
-    wait: number
-): (arg: string) => void {
+function debounce<T extends (arg: string) => unknown>(func: T, wait: number): (arg: string) => void {
     let timeout: ReturnType<typeof setTimeout> | null = null
 
     return (arg: string) => {
@@ -38,11 +37,20 @@ export function useSearch() {
                         variant: "destructive",
                         duration: 1000,
                     })
+                    setSearchResults([])
+                    return
                 }
                 const data = await response.json()
-                setSearchResults(data.data)
+                console.log("Search results:", data.data) // Debug log
+                if (data.success && Array.isArray(data.data)) {
+                    setSearchResults(data.data)
+                } else {
+                    console.error("Invalid search response format:", data)
+                    setSearchResults([])
+                }
             } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+                const errorMessage = error instanceof Error ? error.message : "An unknown error occurred"
+                console.error("Search error:", errorMessage)
                 toast({
                     title: "Error",
                     description: "Search error: " + errorMessage,
@@ -63,6 +71,4 @@ export function useSearch() {
 
     return { searchTerm, setSearchTerm, searchResults, isLoading }
 }
-
-
 

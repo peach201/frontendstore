@@ -9,7 +9,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { useCart } from "@/app/Component/CartContext"
 import ReviewSection from "./ReviewSection"
 
-interface Category {
+interface Category {    
     _id: string
     name: string
 }
