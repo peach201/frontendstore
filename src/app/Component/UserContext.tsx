@@ -46,7 +46,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         };
 
         checkAuth();
-    }, []);
+    }, [API_URL]);
 
     // Logout function
     const logout = async () => {

@@ -68,6 +68,7 @@ export default function HeroSection() {
                 clearInterval(intervalRef.current)
             }
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentImages.length, isPaused])
 
     // Pause auto-rotation when user interacts with dots

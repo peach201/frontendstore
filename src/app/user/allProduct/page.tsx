@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import Link from "next/link"
-import {  Grid, List, Star } from "lucide-react"
+import { Grid, List, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -15,11 +15,9 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import Image from "next/image"
 import { useToast } from "@/components/ui/use-toast"
 import { useDebounce } from "@/hooks/useDebounce"
-// import { useCart } from "@/app/Component/CartContext"
-// import { useRef } from "react"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
-
+const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
 
 interface Product {
     _id: string
@@ -40,7 +38,6 @@ interface Category {
     name: string
 }
 
-const sizeOptions = ["500ml", "1L", "1.5L", "2L"]
 const sortOptions = [
     { value: "price_asc", label: "Price: Low to High" },
     { value: "price_desc", label: "Price: High to Low" },
@@ -51,6 +48,7 @@ const sortOptions = [
 export default function AllProductsPage() {
     const [products, setProducts] = useState<Product[]>([])
     const [categories, setCategories] = useState<Category[]>([])
+    const [availableSizes, setAvailableSizes] = useState<string[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState("")
@@ -62,8 +60,6 @@ export default function AllProductsPage() {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
     const productsPerPage = 12
     const { toast } = useToast()
-    // const { addToCart, cart } = useCart()
-    // const processingRef = useRef(false)
 
     const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
@@ -95,6 +91,42 @@ export default function AllProductsPage() {
         }
     }, [toast])
 
+    const fetchSizes = useCallback(async () => {
+        try {
+            const response = await fetch(`${API_URL}/api/products/sizes/all`, {
+                credentials: "include",
+            })
+            const data = await response.json()
+
+            if (!response.ok) {
+                toast({
+                    title: "Error",
+                    description: "Failed to fetch sizes" + data.message,
+                    variant: "destructive",
+                    duration: 1000,
+                })
+                return
+            }
+
+            if (data.success && Array.isArray(data.data)) {
+                setAvailableSizes(data.data)
+            } else {
+                // Fallback to default sizes if API doesn't return expected format
+                setAvailableSizes(["500ml", "1L", "1.5L", "2L"])
+            }
+        } catch (error) {
+            setError(error instanceof Error ? error.message : "An unknown error occurred")
+            toast({
+                title: "Error",
+                description: "Error fetching sizes:" + (error instanceof Error ? error.message : String(error)),
+                variant: "destructive",
+                duration: 1000,
+            })
+            // Fallback to default sizes
+            setAvailableSizes(["500ml", "1L", "1.5L", "2L"])
+        }
+    }, [toast])
+
     const fetchProducts = useCallback(async () => {
         setIsLoading(true)
         try {
@@ -108,7 +140,7 @@ export default function AllProductsPage() {
                     title: "Error",
                     description: "Failed to fetch products" + data.message,
                     variant: "destructive",
-                     duration: 1000,
+                    duration: 1000,
                 })
             }
 
@@ -129,7 +161,8 @@ export default function AllProductsPage() {
     useEffect(() => {
         fetchProducts()
         fetchCategories()
-    }, [fetchProducts, fetchCategories])
+        fetchSizes()
+    }, [fetchProducts, fetchCategories, fetchSizes])
 
     const filteredAndSortedProducts = useMemo(() => {
         return products
@@ -163,54 +196,6 @@ export default function AllProductsPage() {
         return filteredAndSortedProducts.slice(indexOfFirstProduct, indexOfLastProduct)
     }, [filteredAndSortedProducts, currentPage])
 
-    // const handleAddToCart = (product: Product) => {
-    //     if (processingRef.current) return
-
-    //     if (product.stock <= 0) {
-    //         toast({
-    //             title: "Error",
-    //             description: "This product is out of stock",
-    //             variant: "destructive",
-    //              duration: 1000,
-    //         })
-    //         return
-    //     }
-
-    //     const currentCartItem = cart.find((item) => item.id === product._id)
-    //     const currentQuantity = currentCartItem?.quantity || 0
-
-    //     if (currentQuantity >= product.stock) {
-    //         toast({
-    //             title: "Error",
-    //             description: `Cannot add more items. Maximum stock (${product.stock}) reached.`,
-    //             variant: "destructive",
-    //             duration: 1000,
-    //         })
-    //         return
-    //     }
-
-    //     processingRef.current = true
-
-    //     addToCart({
-    //         id: product._id,
-    //         name: product.name,
-    //         price: product.price,
-    //         quantity: 1,
-    //         image: product.images[0]?.url || "/placeholder.svg",
-    //         stock: product.stock,
-    //     })
-
-    //     toast({
-    //         title: "Success",
-    //         description: "Added to Cart Successfully",
-    //         duration: 1000,
-    //     })
-
-    //     setTimeout(() => {
-    //         processingRef.current = false
-    //     }, 100)
-    // }
-
     const paginate = useCallback((pageNumber: number) => setCurrentPage(pageNumber), [])
 
     const clearAllFilters = () => {
@@ -235,16 +220,6 @@ export default function AllProductsPage() {
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8">
                     <h1 className="text-2xl font-semibold text-gray-900 mb-4 md:mb-0">All Products</h1>
                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                        {/* <div className="relative w-full md:w-auto">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                            <Input
-                                type="text"
-                                placeholder="Search products..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 w-full md:w-[300px] bg-white"
-                            />
-                        </div> */}
                         <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
                             <SelectTrigger className="w-full md:w-[200px] bg-white">
                                 <SelectValue placeholder="Sort by" />
@@ -257,7 +232,7 @@ export default function AllProductsPage() {
                                 ))}
                             </SelectContent>
                         </Select>
-                        <div className=" gap-2 hidden md:flex">
+                        <div className="gap-2 hidden md:flex">
                             <Button
                                 variant={viewMode === "grid" ? "default" : "outline"}
                                 size="icon"
@@ -290,6 +265,7 @@ export default function AllProductsPage() {
                             <SheetTitle> </SheetTitle>
                             <FilterContent
                                 categories={categories}
+                                availableSizes={availableSizes}
                                 selectedCategories={selectedCategories}
                                 setSelectedCategories={setSelectedCategories}
                                 selectedSizes={selectedSizes}
@@ -306,6 +282,7 @@ export default function AllProductsPage() {
                         <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
                             <FilterContent
                                 categories={categories}
+                                availableSizes={availableSizes}
                                 selectedCategories={selectedCategories}
                                 setSelectedCategories={setSelectedCategories}
                                 selectedSizes={selectedSizes}
@@ -333,12 +310,7 @@ export default function AllProductsPage() {
                                 }
                             >
                                 {currentProducts.map((product) => (
-                                    <ProductCard
-                                        key={product._id}
-                                        product={product}
-                                        viewMode={viewMode}
-                                       
-                                    />
+                                    <ProductCard key={product._id} product={product} viewMode={viewMode} />
                                 ))}
                             </div>
                         )}
@@ -365,6 +337,7 @@ export default function AllProductsPage() {
 
 interface FilterContentProps {
     categories: Category[]
+    availableSizes: string[]
     selectedCategories: string[]
     setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>
     selectedSizes: string[]
@@ -376,6 +349,7 @@ interface FilterContentProps {
 
 function FilterContent({
     categories,
+    availableSizes,
     selectedCategories,
     setSelectedCategories,
     selectedSizes,
@@ -418,7 +392,7 @@ function FilterContent({
             <div>
                 <h4 className="text-sm font-medium text-gray-900 mb-4">Sizes</h4>
                 <div className="space-y-3">
-                    {sizeOptions.map((size) => (
+                    {availableSizes.map((size) => (
                         <div key={size} className="flex items-center">
                             <Checkbox
                                 id={`size-${size}`}
@@ -451,13 +425,14 @@ function FilterContent({
 interface ProductCardProps {
     product: Product
     viewMode: "grid" | "list"
-    
 }
 
 function ProductCard({ product, viewMode }: ProductCardProps) {
-    return (    
-         <Link  href={`/user/productDetail/${product._id}`}>
-            <Card className={`bg-white overflow-hidden flex ${viewMode === "list" ? "flex-row" : "flex-col"}`}>
+    const hasRatings = product.ratings > 0 && product.numOfReviews > 0
+
+    return (
+        <Link href={`/user/productDetail/${product._id}`}>
+            <Card className={`bg-white overflow-hidden flex ${viewMode === "list" ? "flex-row" : "flex-col"} h-full`}>
                 <CardHeader className={`p-0 ${viewMode === "list" ? "w-1/3" : ""}`}>
                     <div className={`relative ${viewMode === "list" ? "h-full" : "aspect-square"}`}>
                         <Image
@@ -467,29 +442,42 @@ function ProductCard({ product, viewMode }: ProductCardProps) {
                             objectFit="cover"
                             loading="lazy"
                         />
+                        {product.stock <= 0 && (
+                            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                Out of Stock
+                            </div>
+                        )}
                     </div>
                 </CardHeader>
-                <CardContent className={`flex-1 px-4 py-2 ${viewMode === "list" ? "w-2/3" : ""}`}>
+                <CardContent className={`flex-1 px-4 py-3 flex flex-col ${viewMode === "list" ? "w-2/3" : ""}`}>
+                    <h3 className="font-medium text-gray-900 hover:text-gray-600 transition-colors line-clamp-2 mb-1">
+                        {product.name}
+                    </h3>
 
-                    <h3 className="font-medium text-gray-900  hover:text-gray-600 transition-colors line-clamp-1">{product.name}</h3>
-                    {/* <p className={`text-sm text-gray-500 ${viewMode === "list" ? "" : "line-clamp-2"}`}>{product.description}</p> */}
-                    {viewMode === "list" && (
-                        <div className="mt-4">
-                            <span className="text-lg font-semibold text-red-500">Rs {product.price.toFixed(2)}</span>
+                    <div className="mt-auto">
+                        <div className="flex items-center justify-between">
+                            <span className="text-lg font-semibold text-orange-500">Rs {product.price.toLocaleString()}</span>
+
+                            {viewMode === "list" && hasRatings && (
+                                <div className="flex items-center gap-1">
+                                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                    <span className="text-sm font-medium">{product.ratings.toFixed(1)}</span>
+                                    <span className="text-sm text-gray-500">({product.numOfReviews})</span>
+                                </div>
+                            )}
                         </div>
-                    )}
-                    <div className="flex items-center gap-1 mt-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium">{product.ratings}</span>
-                        {product.numOfReviews > 0 && <span className="text-sm text-gray-500">({product.numOfReviews})</span>}
+
+                        {viewMode === "grid" && hasRatings && (
+                            <div className="flex items-center gap-1 mt-1">
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                <span className="text-sm font-medium">{product.ratings.toFixed(1)}</span>
+                                <span className="text-sm text-gray-500">({product.numOfReviews})</span>
+                            </div>
+                        )}
                     </div>
                 </CardContent>
-                    {viewMode === "grid" && <span className="text-lg font-semibold ml-4 text-red-500">Rs {product.price.toFixed(2)}</span>}
-               
             </Card>
-            
         </Link>
-        
     )
 }
 
@@ -500,9 +488,6 @@ function LoadingState() {
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8">
                     <div className="h-8 bg-gray-300 rounded w-1/4"></div>
                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                        <div className="relative w-full md:w-auto">
-                            <div className="h-10 bg-gray-300 rounded w-full md:w-[300px]"></div>
-                        </div>
                         <div className="w-full md:w-[200px] bg-gray-300 rounded h-10"></div>
                         <div className="flex gap-2">
                             <div className="w-10 h-10 bg-gray-300 rounded"></div>
@@ -532,7 +517,6 @@ function LoadingState() {
                                     </div>
                                     <div className="mt-4 flex justify-between items-center">
                                         <div className="h-6 bg-gray-300 rounded w-1/4"></div>
-                                        <div className="h-8 bg-gray-300 rounded w-1/4"></div>
                                     </div>
                                 </div>
                             ))}

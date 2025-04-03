@@ -2,7 +2,7 @@
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Star } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -94,22 +94,29 @@ export default function ProductGrid() {
                                         />
                                     </div>
                                 </CardHeader>
-                                <div className="flex flex-col w-full">
-                                    <CardContent className="flex-1 px-4 py-3">
+                                <div className="flex flex-col w-full h-full">
+                                    <CardContent className="flex-1 px-4 py-3 flex flex-col">
                                         <h3 className="font-medium text-gray-900 hover:text-gray-600 transition-colors line-clamp-2">
                                             {product.name}
                                         </h3>
-                                        <div className="flex items-center gap-1 mt-1">
-                                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                            <span className="text-sm font-medium">{product.ratings}</span>
-                                            {product.numOfReviews > 0 && (
-                                                <span className="text-sm text-gray-500">({product.numOfReviews})</span>
-                                            )}
+                                        {(product.ratings > 0 || product.numOfReviews > 0) && (
+                                            <div className="flex items-center gap-1 mt-1">
+                                                {product.ratings > 0 && (
+                                                    <>
+                                                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                        <span className="text-sm font-medium">{product.ratings}</span>
+                                                    </>
+                                                )}
+                                                {product.numOfReviews > 0 && (
+                                                    <span className="text-sm text-gray-500">({product.numOfReviews})</span>
+                                                )}
+                                            </div>
+                                        )}
+                                        {/* Push the price to the bottom */}
+                                        <div className="mt-auto">
+                                            <span className="text-md font-semibold text-red-500">Rs {product.price.toFixed(2)}</span>
                                         </div>
                                     </CardContent>
-                                    <CardFooter className="px-4 pb-3 pt-0">
-                                        <span className="text-md font-semibold text-red-500">Rs {product.price.toFixed(2)}</span>
-                                    </CardFooter>
                                 </div>
                             </Card>
                         </Link>

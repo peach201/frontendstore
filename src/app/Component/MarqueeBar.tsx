@@ -34,7 +34,7 @@ export default function MarqueeBar({
 
     return (
         <div className="py-2 overflow-hidden w-full " style={{ backgroundColor, color: textColor }}>
-            <div className="container mx-auto w-1/2 px-4 flex justify-between items-center">
+            <div className="container w-full px-4 flex justify-between items-center">
                 <div className="overflow-hidden flex-1">
                     <motion.div
                         key={currentMessageIndex}

@@ -23,7 +23,8 @@ interface Settings {
     shippingFee: number
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
+const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
 
 export default function StoreSettings() {
     const [categories, setCategories] = useState<Category[]>([])
@@ -36,6 +37,15 @@ export default function StoreSettings() {
     const [newCategory, setNewCategory] = useState({ name: "", description: "", isActive: true })
     const [newShippingFee, setNewShippingFee] = useState(0)
     const { toast } = useToast()
+
+    // Size management states
+    const [sizes, setSizes] = useState<string[]>([])
+    const [isLoadingSizes, setIsLoadingSizes] = useState(false)
+    const [isAddSizeDialogOpen, setIsAddSizeDialogOpen] = useState(false)
+    const [isEditSizeDialogOpen, setIsEditSizeDialogOpen] = useState(false)
+    const [newSize, setNewSize] = useState("")
+    const [currentSize, setCurrentSize] = useState("")
+    const [editedSize, setEditedSize] = useState("")
 
     const fetchCategories = useCallback(async () => {
         setIsLoading(true)
@@ -95,10 +105,42 @@ export default function StoreSettings() {
         }
     }, [toast])
 
+    const fetchSizes = useCallback(async () => {
+        setIsLoadingSizes(true)
+        try {
+            const response = await fetch(`${API_URL}/api/products/sizes/all`, {
+                credentials: "include",
+            })
+            const data = await response.json()
+
+            if (!response.ok) {
+                toast({
+                    title: "Error",
+                    description: "Failed to fetch sizes",
+                    variant: "destructive",
+                    duration: 1000,
+                })
+                return
+            }
+
+            setSizes(data.data || [])
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error instanceof Error ? error.message : "Failed to fetch sizes",
+                duration: 1000,
+            })
+        } finally {
+            setIsLoadingSizes(false)
+        }
+    }, [toast])
+
     useEffect(() => {
         fetchCategories()
         fetchSettings()
-    }, [fetchCategories, fetchSettings]) // ✅ Dependencies added
+        fetchSizes()
+    }, [fetchCategories, fetchSettings, fetchSizes])
 
     const handleDeleteCategory = async (categoryId: string) => {
         try {
@@ -246,6 +288,158 @@ export default function StoreSettings() {
         }
     }
 
+    // Size management handlers
+    const handleAddSize = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!newSize.trim()) {
+            toast({
+                title: "Error",
+                description: "Size cannot be empty",
+                variant: "destructive",
+                duration: 1000,
+            })
+            return
+        }
+
+        try {
+            // Add the new size to the existing sizes
+            const updatedSizes = [...sizes, newSize]
+
+            const response = await fetch(`${API_URL}/api/products/sizes/update`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ newSizes: updatedSizes }),
+            })
+
+            if (response.ok) {
+                fetchSizes()
+                setIsAddSizeDialogOpen(false)
+                setNewSize("")
+                toast({
+                    title: "Success",
+                    description: "Size added successfully",
+                    duration: 1000,
+                })
+            } else {
+                const data = await response.json()
+                toast({
+                    title: "Error",
+                    description: data.message || "Failed to add size",
+                    variant: "destructive",
+                    duration: 1000,
+                })
+            }
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error instanceof Error ? error.message : "Failed to add size",
+                duration: 1000,
+            })
+        }
+    }
+
+    const handleUpdateSize = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!editedSize.trim()) {
+            toast({
+                title: "Error",
+                description: "Size cannot be empty",
+                variant: "destructive",
+                duration: 1000,
+            })
+            return
+        }
+
+        try {
+            // Replace the current size with the edited size
+            const updatedSizes = sizes.map((size) => (size === currentSize ? editedSize : size))
+
+            const response = await fetch(`${API_URL}/api/products/sizes/update`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ newSizes: updatedSizes }),
+            })
+
+            if (response.ok) {
+                fetchSizes()
+                setIsEditSizeDialogOpen(false)
+                setCurrentSize("")
+                setEditedSize("")
+                toast({
+                    title: "Success",
+                    description: "Size updated successfully",
+                    duration: 1000,
+                })
+            } else {
+                const data = await response.json()
+                toast({
+                    title: "Error",
+                    description: data.message || "Failed to update size",
+                    variant: "destructive",
+                    duration: 1000,
+                })
+            }
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error instanceof Error ? error.message : "Failed to update size",
+                duration: 1000,
+            })
+        }
+    }
+
+    const handleDeleteSize = async (sizeToDelete: string) => {
+        if (!confirm(`Are you sure you want to delete the size "${sizeToDelete}"?`)) {
+            return
+        }
+
+        try {
+            // Filter out the size to delete
+            const updatedSizes = sizes.filter((size) => size !== sizeToDelete)
+
+            const response = await fetch(`${API_URL}/api/products/sizes/update`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ newSizes: updatedSizes }),
+            })
+
+            if (response.ok) {
+                fetchSizes()
+                toast({
+                    title: "Success",
+                    description: "Size deleted successfully",
+                    duration: 1000,
+                })
+            } else {
+                const data = await response.json()
+                toast({
+                    title: "Error",
+                    description: data.message || "Failed to delete size",
+                    variant: "destructive",
+                    duration: 1000,
+                })
+            }
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error instanceof Error ? error.message : "Failed to delete size",
+                duration: 1000,
+            })
+        }
+    }
+
     return (
         <div className="container mx-auto py-10">
             <h1 className="text-2xl font-bold mb-5">Store Settings</h1>
@@ -287,6 +481,107 @@ export default function StoreSettings() {
                 )}
             </div>
 
+            {/* Product Sizes Section */}
+            <div className="mb-8">
+                <h2 className="text-xl font-semibold mb-3">Product Sizes</h2>
+                <div className="mb-4 flex justify-between items-center">
+                    <p className="text-sm text-muted-foreground">Manage available product sizes</p>
+                    <Dialog open={isAddSizeDialogOpen} onOpenChange={setIsAddSizeDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button>Add New Size</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Add New Size</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleAddSize} className="space-y-4">
+                                <div>
+                                    <Label htmlFor="newSize">Size (e.g., 500ml, 1L)</Label>
+                                    <Input
+                                        id="newSize"
+                                        value={newSize}
+                                        onChange={(e) => setNewSize(e.target.value)}
+                                        placeholder="Enter size"
+                                    />
+                                </div>
+                                <Button type="submit">Add Size</Button>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Size</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {isLoadingSizes ? (
+                            <TableRow>
+                                <TableCell colSpan={2} className="text-center">
+                                    Loading sizes...
+                                </TableCell>
+                            </TableRow>
+                        ) : sizes.length > 0 ? (
+                            sizes.map((size) => (
+                                <TableRow key={size}>
+                                    <TableCell>{size}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Dialog
+                                            open={isEditSizeDialogOpen && currentSize === size}
+                                            onOpenChange={(open) => {
+                                                setIsEditSizeDialogOpen(open)
+                                                if (!open) {
+                                                    setCurrentSize("")
+                                                    setEditedSize("")
+                                                }
+                                            }}
+                                        >
+                                            <DialogTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="mr-2"
+                                                    onClick={() => {
+                                                        setCurrentSize(size)
+                                                        setEditedSize(size)
+                                                    }}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Edit Size</DialogTitle>
+                                                </DialogHeader>
+                                                <form onSubmit={handleUpdateSize} className="space-y-4">
+                                                    <div>
+                                                        <Label htmlFor="editSize">Size</Label>
+                                                        <Input id="editSize" value={editedSize} onChange={(e) => setEditedSize(e.target.value)} />
+                                                    </div>
+                                                    <Button type="submit">Update Size</Button>
+                                                </form>
+                                            </DialogContent>
+                                        </Dialog>
+                                        <Button variant="outline" size="icon" onClick={() => handleDeleteSize(size)}>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={2} className="text-center">
+                                    No sizes found.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+
             <div>
                 <h2 className="text-xl font-semibold mb-3">Categories</h2>
                 <div className="mb-4 flex justify-between items-center">
@@ -295,7 +590,7 @@ export default function StoreSettings() {
                         <DialogTrigger asChild>
                             <Button>Add New Category</Button>
                         </DialogTrigger>
-                        <DialogContent>                    
+                        <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Add New Category</DialogTitle>
                             </DialogHeader>
@@ -345,77 +640,75 @@ export default function StoreSettings() {
                                     Loading...
                                 </TableCell>
                             </TableRow>
-                        ) : (
-                            Array.isArray(categories) && categories.length > 0 ? (
-                                categories.map((category) => (
-                                    <TableRow key={category._id}>
-                                        <TableCell>{category.name}</TableCell>
-                                        <TableCell>{category.description}</TableCell>
-                                        <TableCell>{category.isActive ? "Active" : "Inactive"}</TableCell>
-                                        <TableCell>
-                                            <Dialog open={isEditCategoryDialogOpen} onOpenChange={setIsEditCategoryDialogOpen}>
-                                                <DialogTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className="mr-2"
-                                                        onClick={() => setCurrentCategory(category)}
-                                                    >
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>Edit Category</DialogTitle>
-                                                    </DialogHeader>
-                                                    {currentCategory && (
-                                                        <form onSubmit={handleUpdateCategory} className="space-y-4">
-                                                            <div>
-                                                                <Label htmlFor="editName">Name</Label>
-                                                                <Input
-                                                                    id="editName"
-                                                                    value={currentCategory.name}
-                                                                    onChange={(e) => setCurrentCategory({ ...currentCategory, name: e.target.value })}
-                                                                />
-                                                            </div>
-                                                            <div>
-                                                                <Label htmlFor="editDescription">Description</Label>
-                                                                <Input
-                                                                    id="editDescription"
-                                                                    value={currentCategory.description}
-                                                                    onChange={(e) =>
-                                                                        setCurrentCategory({ ...currentCategory, description: e.target.value })
-                                                                    }
-                                                                />
-                                                            </div>
-                                                            <div className="flex items-center space-x-2">
-                                                                <Switch
-                                                                    id="editIsActive"
-                                                                    checked={currentCategory.isActive}
-                                                                    onCheckedChange={(checked) =>
-                                                                        setCurrentCategory({ ...currentCategory, isActive: checked })
-                                                                    }
-                                                                />
-                                                                <Label htmlFor="editIsActive">Active</Label>
-                                                            </div>
-                                                            <Button type="submit">Update Category</Button>
-                                                        </form>
-                                                    )}
-                                                </DialogContent>
-                                            </Dialog>
-                                            <Button variant="outline" size="icon" onClick={() => handleDeleteCategory(category._id)}>
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} className="text-center">
-                                        No categories found.
+                        ) : Array.isArray(categories) && categories.length > 0 ? (
+                            categories.map((category) => (
+                                <TableRow key={category._id}>
+                                    <TableCell>{category.name}</TableCell>
+                                    <TableCell>{category.description}</TableCell>
+                                    <TableCell>{category.isActive ? "Active" : "Inactive"}</TableCell>
+                                    <TableCell>
+                                        <Dialog open={isEditCategoryDialogOpen} onOpenChange={setIsEditCategoryDialogOpen}>
+                                            <DialogTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="mr-2"
+                                                    onClick={() => setCurrentCategory(category)}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Edit Category</DialogTitle>
+                                                </DialogHeader>
+                                                {currentCategory && (
+                                                    <form onSubmit={handleUpdateCategory} className="space-y-4">
+                                                        <div>
+                                                            <Label htmlFor="editName">Name</Label>
+                                                            <Input
+                                                                id="editName"
+                                                                value={currentCategory.name}
+                                                                onChange={(e) => setCurrentCategory({ ...currentCategory, name: e.target.value })}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <Label htmlFor="editDescription">Description</Label>
+                                                            <Input
+                                                                id="editDescription"
+                                                                value={currentCategory.description}
+                                                                onChange={(e) =>
+                                                                    setCurrentCategory({ ...currentCategory, description: e.target.value })
+                                                                }
+                                                            />
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <Switch
+                                                                id="editIsActive"
+                                                                checked={currentCategory.isActive}
+                                                                onCheckedChange={(checked) =>
+                                                                    setCurrentCategory({ ...currentCategory, isActive: checked })
+                                                                }
+                                                            />
+                                                            <Label htmlFor="editIsActive">Active</Label>
+                                                        </div>
+                                                        <Button type="submit">Update Category</Button>
+                                                    </form>
+                                                )}
+                                            </DialogContent>
+                                        </Dialog>
+                                        <Button variant="outline" size="icon" onClick={() => handleDeleteCategory(category._id)}>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
-                            )
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center">
+                                    No categories found.
+                                </TableCell>
+                            </TableRow>
                         )}
                     </TableBody>
                 </Table>
@@ -423,3 +716,4 @@ export default function StoreSettings() {
         </div>
     )
 }
+

@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect, useCallback } from "react"
 import { Plus, Pencil, Trash2, Loader2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -13,13 +11,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/components/ui/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ecommercepeachflask-git-main-husnain-alis-projects-dbd16c4d.vercel.app"
-
-
-const sizeOptions = ["500ml", "1L", "1.5L", "2L"]
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://your-api-url.com"
 
 interface Product {
     _id: string
@@ -48,6 +43,7 @@ interface Category {
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([])
     const [categories, setCategories] = useState<Category[]>([])
+    const [availableSizes, setAvailableSizes] = useState<string[]>([])
     const [paginationInfo, setPaginationInfo] = useState<PaginationInfo>({
         total: 0,
         results: 0,
@@ -56,6 +52,8 @@ export default function ProductsPage() {
     })
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [isSizeDialogOpen, setIsSizeDialogOpen] = useState(false)
+    const [newSize, setNewSize] = useState("")
     const [currentProduct, setCurrentProduct] = useState<Product | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState("")
@@ -66,50 +64,52 @@ export default function ProductsPage() {
     const [maxStock, setMaxStock] = useState(100000000)
     const { toast } = useToast()
 
+    const fetchProducts = useCallback(
+        async (page = 1) => {
+            setIsLoading(true)
+            try {
+                const response = await fetch(`${API_URL}/api/products/?page=${page}`, {
+                    credentials: "include",
+                })
+                const data = await response.json()
 
-    const fetchProducts = useCallback(async (page = 1) => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`${API_URL}/api/products/?page=${page}`, {
-                credentials: "include",
-            });
-            const data = await response.json();
+                if (!response.ok) {
+                    toast({
+                        title: "Error",
+                        description: "Failed to fetch products",
+                        variant: "destructive",
+                        duration: 1000,
+                    })
+                    return
+                }
 
-            if (!response.ok) {
+                setProducts(data.data.products)
+                setPaginationInfo({
+                    total: data.data.total,
+                    results: data.data.results,
+                    currentPage: data.data.currentPage,
+                    totalPages: data.data.totalPages,
+                })
+            } catch (error) {
                 toast({
-                    title: "Error",
-                    description: "Failed to fetch products",
                     variant: "destructive",
+                    title: "Error",
+                    description: error instanceof Error ? error.message : "Failed to fetch products",
                     duration: 1000,
-                });
-                return;
+                })
+            } finally {
+                setIsLoading(false)
             }
-
-            setProducts(data.data.products);
-            setPaginationInfo({
-                total: data.data.total,
-                results: data.data.results,
-                currentPage: data.data.currentPage,
-                totalPages: data.data.totalPages,
-            });
-        } catch (error) {
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: error instanceof Error ? error.message : "Failed to fetch products",
-                duration: 1000,
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }, [toast]);
+        },
+        [toast],
+    )
 
     const fetchCategories = useCallback(async () => {
         try {
             const response = await fetch(`${API_URL}/api/categories`, {
                 credentials: "include",
-            });
-            const data = await response.json();
+            })
+            const data = await response.json()
 
             if (!response.ok) {
                 toast({
@@ -117,28 +117,41 @@ export default function ProductsPage() {
                     description: "Failed to fetch categories",
                     variant: "destructive",
                     duration: 1000,
-                });
-                return;
+                })
+                return
             }
 
-            setCategories(data);
+            setCategories(data)
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error",
                 description: error instanceof Error ? error.message : "Failed to fetch categories",
                 duration: 1000,
-            });
+            })
         }
-    }, [toast]);
+    }, [toast])
+
+    const fetchAvailableSizes = useCallback(async () => {
+        try {
+            const response = await fetch(`${API_URL}/api/products/sizes/all`, {
+                credentials: "include",
+            })
+            const data = await response.json()
+
+            if (response.ok && data.data) {
+                setAvailableSizes(data.data)
+            }
+        } catch (error) {
+            console.error("Failed to fetch sizes:", error)
+        }
+    }, [])
 
     useEffect(() => {
-        fetchProducts();
-        fetchCategories();
-    }, [fetchProducts, fetchCategories]); // Now dependencies are stable
-
-
-
+        fetchProducts()
+        fetchCategories()
+        fetchAvailableSizes()
+    }, [fetchProducts, fetchCategories, fetchAvailableSizes])
 
     const filteredProducts = products.filter(
         (product) =>
@@ -150,6 +163,43 @@ export default function ProductsPage() {
             product.stock <= maxStock,
     )
 
+    const handleAddSize = async () => {
+        if (!newSize.trim()) return
+
+        try {
+            const response = await fetch(`${API_URL}/api/products/sizes/update`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ newSizes: [newSize.trim()] }),
+                credentials: "include",
+            })
+
+            const data = await response.json()
+
+            if (response.ok) {
+                toast({
+                    title: "Success",
+                    description: "Size added successfully",
+                    duration: 1000,
+                })
+                setNewSize("")
+                setIsSizeDialogOpen(false)
+                fetchAvailableSizes()
+            } else {
+                throw new Error(data.message || "Failed to add size")
+            }
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: error instanceof Error ? error.message : "Failed to add size",
+                duration: 1000,
+            })
+        }
+    }
+
     const handleAddProduct = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const form = event.currentTarget
@@ -158,11 +208,11 @@ export default function ProductsPage() {
         const sizes = formData.getAll("sizes") as string[]
         const categories = formData.getAll("categories") as string[]
 
-        formData.delete("sizes") // Remove old entries
+        formData.delete("sizes")
         formData.delete("categories")
 
-        sizes.forEach(size => formData.append("sizes[]", size))
-        categories.forEach(category => formData.append("categories[]", category))
+        sizes.forEach((size) => formData.append("sizes[]", size))
+        categories.forEach((category) => formData.append("categories[]", category))
 
         setIsLoading(true)
         try {
@@ -192,7 +242,6 @@ export default function ProductsPage() {
                     duration: 1000,
                 })
             }
-
         } catch (error) {
             toast({
                 variant: "destructive",
@@ -212,11 +261,14 @@ export default function ProductsPage() {
         const form = event.currentTarget
         const formData = new FormData(form)
 
-        const sizes = formData.getAll("sizes").join(",")
-        const categories = formData.getAll("categories").join(",")
+        const sizes = formData.getAll("sizes") as string[]
+        const categories = formData.getAll("categories") as string[]
 
-        formData.set("sizes", sizes)
-        formData.set("categories", categories)
+        formData.delete("sizes")
+        formData.delete("categories")
+
+        sizes.forEach((size) => formData.append("sizes[]", size))
+        categories.forEach((category) => formData.append("categories[]", category))
 
         setIsLoading(true)
         try {
@@ -236,8 +288,6 @@ export default function ProductsPage() {
                     duration: 1000,
                 })
             }
-
-
 
             setIsEditDialogOpen(false)
             fetchProducts()
@@ -285,8 +335,6 @@ export default function ProductsPage() {
                 })
             }
 
-
-
             fetchProducts()
             toast({
                 title: "Success",
@@ -306,10 +354,16 @@ export default function ProductsPage() {
     }
 
     const handleDeleteImage = async (productId: string, imageId: string) => {
+        if (!confirm("Are you sure you want to delete this image?")) return
+
         setIsLoading(true)
         try {
-            const response = await fetch(`${API_URL}/api/products/${productId}/images/${imageId}`, {
-                method: "DELETE",
+            const formData = new FormData()
+            formData.append("imagesToDelete", imageId)
+
+            const response = await fetch(`${API_URL}/api/products/${productId}`, {
+                method: "PUT",
+                body: formData,
                 credentials: "include",
             })
 
@@ -317,10 +371,11 @@ export default function ProductsPage() {
                 const data = await response.json()
                 toast({
                     title: "Error",
-                    description: "Failed to delete image" + data.message,
+                    description: `Failed to delete image: ${data.message || "Unknown error occurred"}`,
                     variant: "destructive",
                     duration: 1000,
                 })
+                return
             }
 
             if (currentProduct) {
@@ -359,72 +414,111 @@ export default function ProductsPage() {
         <div className="container mx-auto py-10">
             <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold mb-4 sm:mb-0">Products ({paginationInfo.total})</h1>
-                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" /> Add Product
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl">
-                        <DialogHeader>
-                            <DialogTitle>Add New Product</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={handleAddProduct} className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <Label htmlFor="name">Name</Label>
-                                    <Input id="name" name="name" required />
-                                </div>
-                                <div>
-                                    <Label htmlFor="price">Price</Label>
-                                    <Input id="price" name="price" type="number" step="0.01" required />
-                                </div>
-                                <div>
-                                    <Label htmlFor="stock">Stock</Label>
-                                    <Input id="stock" name="stock" type="number" required />
-                                </div>
-                                <div>
-                                    <Label htmlFor="images">Images</Label>
-                                    <Input id="images" name="images" type="file" multiple accept="image/*" required />
-                                </div>
-                            </div>
-
-                            <div>
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea id="description" name="description" required />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <Label>Sizes</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {sizeOptions.map((size) => (
-                                            <label key={size} className="flex items-center space-x-2">
-                                                <Checkbox name="sizes" value={size} />
-                                                <span>{size}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div>
-                                    <Label>Categories</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {categories.map((category) => (
-                                            <label key={category._id} className="flex items-center space-x-2">
-                                                <Checkbox name="categories" value={category._id} />
-                                                <span>{category.name}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <Button type="submit" disabled={isLoading}>
-                                {isLoading ? "Adding..." : "Add Product"}
+                <div className="flex gap-2">
+                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <Plus className="mr-2 h-4 w-4" /> Add Product
                             </Button>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl">
+                            <DialogHeader>
+                                <DialogTitle>Add New Product</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleAddProduct} className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="name">Name</Label>
+                                        <Input id="name" name="name" required />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="price">Price</Label>
+                                        <Input id="price" name="price" type="number" step="0.01" required />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="stock">Stock</Label>
+                                        <Input id="stock" name="stock" type="number" required />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="images">Images</Label>
+                                        <Input id="images" name="images" type="file" multiple accept="image/*" required />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="description">Description</Label>
+                                    <Textarea id="description" name="description" required />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <Label>Sizes</Label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {availableSizes.map((size) => (
+                                                <label key={size} className="flex items-center space-x-2">
+                                                    <Checkbox name="sizes" value={size} />
+                                                    <span>{size}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label>Categories</Label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {categories.map((category) => (
+                                                <label key={category._id} className="flex items-center space-x-2">
+                                                    <Checkbox name="categories" value={category._id} />
+                                                    <span>{category.name}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <Button type="submit" disabled={isLoading}>
+                                    {isLoading ? "Adding..." : "Add Product"}
+                                </Button>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    <Dialog open={isSizeDialogOpen} onOpenChange={setIsSizeDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="outline">
+                                <Pencil className="mr-2 h-4 w-4" /> Manage Sizes
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Manage Product Sizes</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                                <div>
+                                    <Label>Current Sizes</Label>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {availableSizes.map((size) => (
+                                            <Badge key={size} variant="outline" className="px-3 py-1">
+                                                {size}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label htmlFor="new-size">Add New Size</Label>
+                                    <div className="flex gap-2 mt-2">
+                                        <Input
+                                            id="new-size"
+                                            value={newSize}
+                                            onChange={(e) => setNewSize(e.target.value)}
+                                            placeholder="e.g. 2.5L"
+                                        />
+                                        <Button onClick={handleAddSize}>Add</Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
             <div className="mb-6 space-y-4">
@@ -517,6 +611,7 @@ export default function ProductsPage() {
                             <TableHead>Name</TableHead>
                             <TableHead>Price</TableHead>
                             <TableHead>Stock</TableHead>
+                            <TableHead>Sizes</TableHead>
                             <TableHead>Categories</TableHead>
                             <TableHead>Actions</TableHead>
                         </TableRow>
@@ -536,6 +631,15 @@ export default function ProductsPage() {
                                 <TableCell>{product.name}</TableCell>
                                 <TableCell>Rs {product.price.toFixed(2)}</TableCell>
                                 <TableCell>{product.stock}</TableCell>
+                                <TableCell>
+                                    <div className="flex flex-wrap gap-1">
+                                        {product.sizes.map((size) => (
+                                            <Badge key={size} variant="outline">
+                                                {size}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </TableCell>
                                 <TableCell>
                                     {product.categories.map((cat) => categories.find((c) => c._id === cat)?.name).join(", ")}
                                 </TableCell>
@@ -620,7 +724,7 @@ export default function ProductsPage() {
                                 <div>
                                     <Label>Sizes</Label>
                                     <div className="flex flex-wrap gap-2">
-                                        {sizeOptions.map((size) => (
+                                        {availableSizes.map((size) => (
                                             <label key={size} className="flex items-center space-x-2">
                                                 <Checkbox name="sizes" value={size} defaultChecked={currentProduct.sizes.includes(size)} />
                                                 <span>{size}</span>
@@ -681,4 +785,3 @@ export default function ProductsPage() {
         </div>
     )
 }
-

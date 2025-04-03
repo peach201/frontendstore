@@ -39,10 +39,10 @@ export default function Header() {
 
     // Debug state to check search results
     interface Product {
-        _id: string;
-        name: string;
-        price: number;
-        images?: Array<{ url: string }>;
+        _id: string
+        name: string
+        price: number
+        images?: Array<{ url: string }>
     }
     const [, setDebugResults] = useState<Product[]>([])
 
@@ -324,6 +324,11 @@ export default function Header() {
                                     <DropdownMenuItem asChild>
                                         <Link href="/user/myOrders">My Orders</Link>
                                     </DropdownMenuItem>
+                                    {user?.role === "admin" && (
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/admin/products">Admin Dashboard</Link>
+                                        </DropdownMenuItem>
+                                    )}
                                     <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={handleLogout}>
                                         Logout
                                     </DropdownMenuItem>
@@ -469,3 +474,4 @@ export default function Header() {
         </header>
     )
 }
+

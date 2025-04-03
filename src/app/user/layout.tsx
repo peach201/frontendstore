@@ -1,5 +1,4 @@
 import Footer from "../Component/Footer";
-import Newsletter from "../Component/Newsletter";
 
 export default function AdminLayout({
     children,
@@ -10,7 +9,6 @@ export default function AdminLayout({
         <div className="">
             
             {children}
-            <Newsletter/>
             <Footer/>
         </div>
     );

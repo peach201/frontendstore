@@ -50,7 +50,7 @@ export default function PromotionBar({
                 </AnimatePresence>
 
                 {showSocialIcons && (
-                    <div className="flex space-x-4 ml-4 shrink-0">
+                    <div className="md:flex lg:flex space-x-4 ml-4 shrink-0 hidden ">
                         <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
                             <Facebook className="h-5 w-5" />
                         </a>
